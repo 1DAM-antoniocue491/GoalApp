@@ -1,4 +1,4 @@
-# ⚽ Liga Amateur App
+# Liga Amateur App
 
 ## 1. Descripción
 

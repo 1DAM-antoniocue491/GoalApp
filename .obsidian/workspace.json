@@ -185,6 +185,7 @@
   },
   "active": "c5c51b096e6534df",
   "lastOpenFiles": [
+    "backend/database/init.sql",
     "README.md",
     "backend/README.md",
     "backend/app/api/dependencies.py.txt",

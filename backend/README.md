@@ -1,6 +1,6 @@
 # Backend – Liga Amateur App
 
-## Descripción
+## 1. Descripción
 
 El backend de la aplicación **Liga Amateur App** está desarrollado con **FastAPI** y se encarga de:
 
@@ -19,7 +19,7 @@ El backend de la aplicación **Liga Amateur App** está desarrollado con **FastA
 
 ---
 
-## Tecnologías
+## 2. Tecnologías
 
 - **Python 3.10+**
     
@@ -34,7 +34,7 @@ El backend de la aplicación **Liga Amateur App** está desarrollado con **FastA
 
 ---
 
-## Estructura de carpetas
+## 3. Estructura de carpetas
 
 ```
 backend/
@@ -94,7 +94,7 @@ backend/
 
 ---
 
-## Explicación de carpetas
+## 4. Explicación de carpetas
 
 |Carpeta/Fichero|Contenido / Función|
 |---|---|
@@ -108,7 +108,7 @@ backend/
 
 ---
 
-## Uso de la API
+## 5. Uso de la API
 
 - Todos los endpoints están en `app/api/endpoints/`
     
@@ -129,7 +129,7 @@ backend/
 
 ---
 
-## Notas
+## 6. Notas
 
 - Mantener **nombres de columnas en español** coherentes con la base de datos
     
