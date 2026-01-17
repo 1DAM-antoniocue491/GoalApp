@@ -46,7 +46,7 @@ El proyecto está orientado a grupos de amigos, asociaciones o ligas locales que
 
 **Base de datos:**
 
-- PostgreSQL o MySQL
+- MySQL
     
 - Modelo relacional normalizado con tablas: usuarios, roles, jugadores, equipos, ligas, partidos, eventos, formaciones, alineaciones y notificaciones
     
@@ -96,18 +96,8 @@ El proyecto está orientado a grupos de amigos, asociaciones o ligas locales que
     
 
 ---
----
 
-## 5. Documentación
-
-- **Modelo conceptual:** `docs/modelo_datos_conceptual.md`
-    
-- **Modelo SQL y scripts:** `docs/modelo_datos_sql.md`
-    
-
----
-
-## 6. Contribución
+## 5. Contribución
 
 - Mantener la estructura de carpetas
     
@@ -120,7 +110,7 @@ El proyecto está orientado a grupos de amigos, asociaciones o ligas locales que
 
 ---
 
-## 7. Escalabilidad y mejoras futuras
+## 6. Escalabilidad y mejoras futuras
 
 - Añadir panel web de administración completo
     
