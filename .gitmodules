@@ -1,0 +1,3 @@
+[submodule "doc"]
+	path = doc
+	url = https://github.com/1DAM-antoniocue491/GoalApp_Doc.git
