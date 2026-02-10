@@ -3,37 +3,23 @@
 ## 1. Descripción
 
 El backend de la aplicación **Liga Amateur App** está desarrollado con **FastAPI** y se encarga de:
-
 - Gestionar usuarios, roles y permisos
-    
 - Administrar ligas, equipos, jugadores y partidos
-    
 - Registrar eventos de partidos (goles, tarjetas, cambios…)
-    
 - Controlar formaciones y alineaciones
-    
 - Proveer una **API REST** para que el frontend (móvil y web) consuma los datos
-    
 - Garantizar seguridad, integridad y consistencia de la base de datos
-    
 
 ---
-
 ## 2. Tecnologías
 
 - **Python 3.10+**
-    
 - **FastAPI** (Framework web y API)
-    
 - **SQLAlchemy** (ORM para la base de datos)
-    
 - **MySQL** (Base de datos relacional)
-    
 - **Alembic** (Migraciones de base de datos)
-    
 
 ---
-
 ## 3. Estructura de carpetas
 
 ```
@@ -111,30 +97,19 @@ backend/
 ## 5. Uso de la API
 
 - Todos los endpoints están en `app/api/endpoints/`
-    
 - Se recomienda autenticación mediante token JWT
-    
 - Ejemplo de endpoints principales:
-    
     - `/usuarios/` → gestión de usuarios
-        
     - `/equipos/` → gestión de equipos
-        
     - `/partidos/` → registro de partidos
-        
     - `/eventos/` → registrar goles, tarjetas y cambios
-        
     - `/formaciones/` → gestionar formaciones y alineaciones
-        
 
 ---
 
 ## 6. Notas
 
 - Mantener **nombres de columnas en español** coherentes con la base de datos
-    
 - Separación clara entre **models**, **schemas** y **endpoints**
-    
 - Validación y permisos aplicados en **dependencies.py**
-    
 - Seguir buenas prácticas de desarrollo y commits claros
