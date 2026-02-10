@@ -25,8 +25,8 @@ El backend de la aplicación **Liga Amateur App** está desarrollado con **FastA
 ```
 backend/
 ├── app/
-│   ├── api/                        
-│   │   ├── endpoints/              
+│   ├── api/
+│   │   ├── routers/                     ← antes “endpoints”
 │   │   │   ├── usuarios.py
 │   │   │   ├── roles.py
 │   │   │   ├── equipos.py
@@ -37,9 +37,22 @@ backend/
 │   │   │   ├── formaciones.py
 │   │   │   ├── alineaciones.py
 │   │   │   └── notificaciones.py
-│   │   └── dependencies.py         
+│   │   │
+│   │   ├── services/                   ← carpeta nueva
+│   │   │   ├── usuario_service.py
+│   │   │   ├── rol_service.py
+│   │   │   ├── equipo_service.py
+│   │   │   ├── jugador_service.py
+│   │   │   ├── liga_service.py
+│   │   │   ├── partido_service.py
+│   │   │   ├── evento_service.py
+│   │   │   ├── formacion_service.py
+│   │   │   ├── alineacion_service.py
+│   │   │   └── notificacion_service.py
+│   │   │
+│   │   └── dependencies.py
 │   │
-│   ├── models/                     
+│   ├── models/
 │   │   ├── usuario.py
 │   │   ├── rol.py
 │   │   ├── usuario_rol.py
@@ -55,7 +68,7 @@ backend/
 │   │   ├── alineacion_partido.py
 │   │   └── notificacion.py
 │   │
-│   ├── schemas/                    
+│   ├── schemas/
 │   │   ├── usuario.py
 │   │   ├── rol.py
 │   │   ├── equipo.py
@@ -67,14 +80,14 @@ backend/
 │   │   ├── alineacion.py
 │   │   └── notificacion.py
 │   │
-│   ├── database/                   
-│   │   ├── connection.py           
-│   │   ├── init.sql                
-│   │   └── migrations/             
+│   ├── database/
+│   │   ├── connection.py
+│   │   ├── init.sql
+│   │   └── migrations/
 │   │
-│   └── main.py                     
+│   └── main.py
 │
-├── requirements.txt                 
+├── requirements.txt
 └── README.md
 ```
 
