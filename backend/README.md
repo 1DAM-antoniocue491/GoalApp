@@ -26,7 +26,8 @@ El backend de la aplicación **Liga Amateur App** está desarrollado con **FastA
 backend/
 ├── app/
 │   ├── api/
-│   │   ├── routers/                     ← antes “endpoints”
+│   │   ├── routers/
+│   │   │   ├── auth.py
 │   │   │   ├── usuarios.py
 │   │   │   ├── roles.py
 │   │   │   ├── equipos.py
@@ -35,10 +36,9 @@ backend/
 │   │   │   ├── partidos.py
 │   │   │   ├── eventos.py
 │   │   │   ├── formaciones.py
-│   │   │   ├── alineaciones.py
 │   │   │   └── notificaciones.py
 │   │   │
-│   │   ├── services/                   ← carpeta nueva
+│   │   ├── services/
 │   │   │   ├── usuario_service.py
 │   │   │   ├── rol_service.py
 │   │   │   ├── equipo_service.py
@@ -47,12 +47,12 @@ backend/
 │   │   │   ├── partido_service.py
 │   │   │   ├── evento_service.py
 │   │   │   ├── formacion_service.py
-│   │   │   ├── alineacion_service.py
 │   │   │   └── notificacion_service.py
 │   │   │
 │   │   └── dependencies.py
 │   │
 │   ├── models/
+│   │   ├── __init__.py
 │   │   ├── usuario.py
 │   │   ├── rol.py
 │   │   ├── usuario_rol.py
@@ -65,7 +65,6 @@ backend/
 │   │   ├── posicion_formacion.py
 │   │   ├── formacion_equipo.py
 │   │   ├── formacion_partido.py
-│   │   ├── alineacion_partido.py
 │   │   └── notificacion.py
 │   │
 │   ├── schemas/
