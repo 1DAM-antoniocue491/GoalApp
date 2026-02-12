@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "backend/README.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               },
@@ -185,9 +185,9 @@
   },
   "active": "c5c51b096e6534df",
   "lastOpenFiles": [
+    "backend/README.md",
     "backend/database/init.sql",
     "README.md",
-    "backend/README.md",
     "backend/app/api/dependencies.py.txt",
     "backend/app/api/Nuevo documento de texto.txt",
     "backend/app/api",
@@ -197,7 +197,6 @@
     "backend/database/schema.sql",
     "backend/database/scriptSQL.sql",
     "backend/models",
-    "backend/database",
-    "backend/app"
+    "backend/database"
   ]
 }
