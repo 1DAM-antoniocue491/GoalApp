@@ -106,7 +106,7 @@ GoalApp/
 ### 2. Clonar el Repositorio
 
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/1DAM-antoniocue491/GoalApp.git
 cd GoalApp
 ```
 
@@ -122,13 +122,14 @@ pip install -r requirements.txt
 #### Crear la base de datos en MySQL:
 
 ```sql
+mysql -u <user> -p
 CREATE DATABASE futbol_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 #### Ejecutar script de inicialización:
 
 ```bash
-mysql -u tu_usuario -p futbol_app < app/database/init.sql
+mysql -u <user> -p futbol_app < app/database/init.sql
 ```
 
 ### 5. Configurar Variables de Entorno
@@ -356,76 +357,6 @@ Edita `backend/.env`:
 ENVIRONMENT=production
 DATABASE_ECHO=False
 ```
-
-## 🧪 Testing
-
-### Ejemplo con cURL
-
-```bash
-# Health check
-curl http://localhost:8000/health
-
-# Login
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=juan@example.com&password=password123"
-
-# Listar ligas (con autenticación)
-curl http://localhost:8000/api/v1/ligas/ \
-  -H "Authorization: Bearer <tu_token>"
-```
-
-### Ejemplo con Postman
-
-1. Importar la colección desde `/docs` → "Download OpenAPI spec"
-2. Crear variable de entorno `{{token}}`
-3. Usar `{{token}}` en headers de autenticación
-
-## 🧪 Testing
-
-### Ejecutar Tests
-
-```bash
-cd backend
-pytest
-```
-
-### Opciones Disponibles
-
-```bash
-# Tests unitarios solamente
-pytest tests/unit/
-
-# Tests de integración solamente
-pytest tests/integration/
-
-# Con cobertura de código
-pytest --cov=app --cov-report=html
-
-# Tests específicos
-pytest tests/integration/test_auth.py
-pytest -k "login"
-```
-
-### Script de PowerShell
-
-```powershell
-# Todos los tests
-.\run_tests.ps1
-
-# Tests unitarios
-.\run_tests.ps1 -Type unit
-
-# Tests de integración con cobertura
-.\run_tests.ps1 -Type integration -Coverage
-
-# Verbose y detener en primer fallo
-.\run_tests.ps1 -Verbose -StopOnFail
-```
-
-📖 **Documentación completa:** Ver `backend/TESTING.md`
-
----
 
 ## 🐛 Solución de Problemas
 
