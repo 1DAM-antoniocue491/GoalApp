@@ -6,14 +6,16 @@ from datetime import datetime, timedelta
 from app.database.connection import SessionLocal
 from app.api.services.usuario_service import obtener_usuario_por_id
 from app.schemas.usuario import UsuarioResponse
+from app.config import settings
 
 # ============================================================
-# CONFIGURACIÓN GLOBAL (puedes moverlo a un settings.py si quieres)
+# CONFIGURACIÓN GLOBAL
 # ============================================================
 
-SECRET_KEY = "CAMBIA_ESTE_VALOR_POR_UNA_CLAVE_SEGURA"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+# Importar configuración desde settings
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 

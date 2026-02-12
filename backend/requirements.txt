@@ -5,5 +5,12 @@ pymysql
 alembic
 python-dotenv
 pydantic
+pydantic-settings
 python-jose
 passlib[bcrypt]
+
+# Testing
+pytest
+pytest-asyncio
+httpx
+faker
