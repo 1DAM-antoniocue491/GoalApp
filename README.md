@@ -30,7 +30,6 @@ Aplicación backend desarrollada con FastAPI para gestionar ligas de fútbol ama
 ```
 GoalApp/
 ├── backend/
-│   ├── .env                    # Variables de entorno (NO subir a Git)
 │   ├── .env.example            # Plantilla de configuración
 │   ├── requirements.txt        # Dependencias Python
 │   └── app/
@@ -39,59 +38,11 @@ GoalApp/
 │       ├── api/
 │       │   ├── dependencies.py # Autenticación y dependencias
 │       │   ├── routers/        # Endpoints REST (10 routers)
-│       │   │   ├── auth.py
-│       │   │   ├── usuarios.py
-│       │   │   ├── roles.py
-│       │   │   ├── ligas.py
-│       │   │   ├── equipos.py
-│       │   │   ├── jugadores.py
-│       │   │   ├── partidos.py
-│       │   │   ├── eventos.py
-│       │   │   ├── formaciones.py
-│       │   │   └── notificaciones.py
 │       │   └── services/       # Lógica de negocio (9 services)
-│       │       ├── usuario_service.py
-│       │       ├── rol_service.py
-│       │       ├── liga_service.py
-│       │       ├── equipo_service.py
-│       │       ├── jugador_service.py
-│       │       ├── partido_service.py
-│       │       ├── evento_service.py
-│       │       ├── formacion_service.py
-│       │       └── notificacion_service.py
-│       ├── models/              # Modelos ORM SQLAlchemy (13 modelos)
-│       │   ├── usuario.py
-│       │   ├── rol.py
-│       │   ├── usuario_rol.py
-│       │   ├── liga.py
-│       │   ├── equipo.py
-│       │   ├── jugador.py
-│       │   ├── partido.py
-│       │   ├── evento_partido.py
-│       │   ├── formacion.py
-│       │   ├── posicion_formacion.py
-│       │   ├── formacion_equipo.py
-│       │   ├── formacion_partido.py
-│       │   └── notificacion.py
-│       ├── schemas/             # Schemas Pydantic (13 schemas)
-│       │   ├── usuario.py
-│       │   ├── rol.py
-│       │   ├── usuario_rol.py
-│       │   ├── liga.py
-│       │   ├── equipo.py
-│       │   ├── jugador.py
-│       │   ├── partido.py
-│       │   ├── evento_partido.py
-│       │   ├── formacion.py
-│       │   ├── posicion_formacion.py
-│       │   ├── formacion_equipo.py
-│       │   ├── formacion_partido.py
-│       │   └── notificacion.py
+│       ├── models/             # Modelos ORM SQLAlchemy (13 modelos)
+│       ├── schemas/            # Schemas Pydantic (13 schemas)
 │       └── database/
-│           ├── connection.py   # Configuración SQLAlchemy
-│           └── init.sql        # Script de inicialización DB
 ├── .gitignore
-├── AGENTS.md                   # Guía para Verdent AI
 └── README.md                   # Este archivo
 ```
 
