@@ -4,13 +4,8 @@ sqlalchemy
 pymysql
 alembic
 python-dotenv
-pydantic
+pydantic[email]
 pydantic-settings
 python-jose
 passlib[bcrypt]
-
-# Testing
-pytest
-pytest-asyncio
-httpx
-faker
+python-multipart

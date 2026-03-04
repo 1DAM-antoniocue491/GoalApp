@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "backend/README.md",
+                "file": "reuniones/2026-03-02.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "2026-03-02"
             }
           }
         ]
@@ -185,8 +185,10 @@
   },
   "active": "c5c51b096e6534df",
   "lastOpenFiles": [
-    "README.md",
     "backend/README.md",
+    "reuniones/2026-03-02.md",
+    "reuniones",
+    "README.md",
     "backend/TESTING.md",
     "backend/database/init.sql",
     "backend/app/api/dependencies.py.txt",
@@ -197,7 +199,6 @@
     "GoalApp",
     "backend/database/schema.sql",
     "backend/database/scriptSQL.sql",
-    "backend/models",
-    "backend/database"
+    "backend/models"
   ]
 }
