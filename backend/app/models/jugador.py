@@ -4,16 +4,17 @@ Modelo de Jugador para vincular usuarios con equipos.
 Almacena información deportiva del jugador (posición, dorsal, estado).
 """
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, func
+from sqlalchemy.orm import relationship
 from ..database.connection import Base
 
 
 class Jugador(Base):
     """
     Modelo ORM para la tabla 'jugadores'.
-    
+
     Vincula un usuario con un equipo como jugador, añadiendo información
     deportiva específica (posición, dorsal, estado activo/inactivo).
-    
+
     Attributes:
         id_jugador (int): Identificador único del jugador (Primary Key)
         id_usuario (int): ID del usuario asociado (Foreign Key, único)
@@ -23,6 +24,8 @@ class Jugador(Base):
         activo (bool): Si el jugador está activo en el equipo (default: True)
         created_at (datetime): Fecha y hora de creación del registro
         updated_at (datetime): Fecha y hora de última actualización
+        usuario (Usuario): Relación con el usuario
+        equipo (Equipo): Relación con el equipo
     """
     __tablename__ = "jugadores"
 
@@ -41,3 +44,7 @@ class Jugador(Base):
     # Auditoría: fechas de creación y actualización
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relaciones ORM
+    usuario = relationship("Usuario", lazy="selectin")
+    equipo = relationship("Equipo", lazy="selectin")

@@ -80,4 +80,4 @@ class EquipoResponse(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True  # Permite crear el schema desde objetos ORM de SQLAlchemy
+        from_attributes = True  # Permite crear el schema desde objetos ORM de SQLAlchemy

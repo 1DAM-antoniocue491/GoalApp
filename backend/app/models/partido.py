@@ -4,16 +4,17 @@ Modelo de Partido para gestionar los encuentros entre equipos.
 Almacena fecha, equipos, resultado y estado del partido.
 """
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, func
+from sqlalchemy.orm import relationship
 from ..database.connection import Base
 
 
 class Partido(Base):
     """
     Modelo ORM para la tabla 'partidos'.
-    
+
     Representa un partido de fútbol entre dos equipos en una liga específica.
     Incluye información de fecha, estado del partido y resultado.
-    
+
     Attributes:
         id_partido (int): Identificador único del partido (Primary Key)
         id_liga (int): ID de la liga a la que pertenece (Foreign Key)
@@ -25,6 +26,9 @@ class Partido(Base):
         goles_visitante (int): Goles marcados por el equipo visitante (opcional, null si no ha comenzado)
         created_at (datetime): Fecha y hora de creación del registro
         updated_at (datetime): Fecha y hora de última actualización
+        liga (Liga): Relación con la liga
+        equipo_local (Equipo): Relación con el equipo local
+        equipo_visitante (Equipo): Relación con el equipo visitante
     """
     __tablename__ = "partidos"
 
@@ -47,3 +51,8 @@ class Partido(Base):
     # Auditoría: fechas de creación y actualización
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relaciones ORM
+    liga = relationship("Liga", lazy="selectin")
+    equipo_local = relationship("Equipo", foreign_keys=[id_equipo_local], lazy="selectin")
+    equipo_visitante = relationship("Equipo", foreign_keys=[id_equipo_visitante], lazy="selectin")

@@ -4,16 +4,17 @@ Modelo de Usuario para la base de datos.
 Representa los usuarios registrados en el sistema con sus credenciales y datos básicos.
 """
 from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy.orm import relationship
 from ..database.connection import Base
 
 
 class Usuario(Base):
     """
     Modelo ORM para la tabla 'usuarios'.
-    
+
     Un usuario puede tener múltiples roles (Admin, Coach, Delegate, Player, Viewer)
     y puede estar asociado a equipos como jugador, entrenador o delegado.
-    
+
     Attributes:
         id_usuario (int): Identificador único del usuario (Primary Key)
         nombre (str): Nombre completo del usuario (máx. 100 caracteres)
@@ -21,12 +22,13 @@ class Usuario(Base):
         contraseña_hash (str): Hash bcrypt de la contraseña (máx. 255 caracteres)
         created_at (datetime): Fecha y hora de creación del registro
         updated_at (datetime): Fecha y hora de última actualización
+        roles (list): Lista de roles asignados al usuario (relación N:N)
     """
     __tablename__ = "usuarios"
 
     # Clave primaria
     id_usuario = Column(Integer, primary_key=True, index=True)
-    
+
     # Información básica
     nombre = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False, unique=True)  # Email único para login
@@ -35,3 +37,6 @@ class Usuario(Base):
     # Auditoría: fechas de creación y actualización
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relaciones
+    roles = relationship("Rol", secondary="usuario_rol", back_populates="usuarios", lazy="selectin")

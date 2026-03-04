@@ -46,12 +46,14 @@ def get_current_user(
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: int = payload.get("sub")
+        user_id_str = payload.get("sub")
 
-        if user_id is None:
+        if user_id_str is None:
             raise credenciales_invalidas
 
-    except JWTError:
+        user_id = int(user_id_str)
+
+    except (JWTError, ValueError):
         raise credenciales_invalidas
 
     usuario = obtener_usuario_por_id(db, user_id)

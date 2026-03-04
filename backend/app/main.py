@@ -36,20 +36,20 @@ async def lifespan(app: FastAPI):
     Se ejecuta al inicio y al cierre del servidor.
     """
     # Startup: Crear tablas si no existen
-    print("🚀 Iniciando aplicación...")
-    print(f"📊 Conectando a base de datos: {settings.DATABASE_URL.split('@')[1]}")
-    
+    print("[INFO] Iniciando aplicación...")
+    print(f"[INFO] Conectando a base de datos: {settings.DATABASE_URL.split('@')[1]}")
+
     # Crear todas las tablas definidas en los modelos
     # NOTA: En producción, usar Alembic en lugar de esto
     Base.metadata.create_all(bind=engine)
-    print("✅ Tablas de base de datos verificadas")
-    
+    print("[OK] Tablas de base de datos verificadas")
+
     yield
-    
+
     # Shutdown: Cerrar conexiones
-    print("🛑 Cerrando aplicación...")
+    print("[INFO] Cerrando aplicación...")
     engine.dispose()
-    print("✅ Conexiones de base de datos cerradas")
+    print("[OK] Conexiones de base de datos cerradas")
 
 
 # ============================================================
