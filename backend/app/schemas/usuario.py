@@ -37,7 +37,7 @@ class UsuarioCreate(UsuarioBase):
     # Se ejecuta automáticamente después de que los campos básicos
     # hayan sido validados (tipo, longitud mínima, etc.).
     # --------------------------------------------------------------
-    @field_validator("password")
+    @field_validator("contraseña")
     @classmethod
     def validar_longitud_maxima(cls, v: str) -> str:
         """
