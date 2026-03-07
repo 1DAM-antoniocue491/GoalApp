@@ -29,7 +29,7 @@ def hash_password(password: str) -> str:
     Returns:
         str: Hash de la contraseña
     """
-    console.debug(f"Contraseña que se va a hashear: {password}")
+    console.debug(f"{len(password)} caracteres, {len(password.encode('utf-8'))} bytes")
     return pwd_context.hash(password)
 
 
