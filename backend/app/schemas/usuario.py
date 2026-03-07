@@ -2,7 +2,7 @@
 Schemas de validación para el recurso Usuario.
 Define los modelos Pydantic para request/response de la API relacionados con usuarios del sistema.
 """
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime
 
 class UsuarioBase(BaseModel):
@@ -37,7 +37,8 @@ class UsuarioCreate(UsuarioBase):
     # Se ejecuta automáticamente después de que los campos básicos
     # hayan sido validados (tipo, longitud mínima, etc.).
     # --------------------------------------------------------------
-    @validator("contraseña")
+    @field_validator("password")
+    @classmethod
     def validar_longitud_maxima(cls, v: str) -> str:
         """
         bcrypt solo permite contraseñas de **≤ 72 bytes**.
@@ -62,7 +63,7 @@ class UsuarioCreate(UsuarioBase):
         # Con esta opción el modelo acepta **ambos** nombres:
         #   - "password"
         #   - "contraseña"
-        allow_population_by_field_name = True
+        validate_by_name = True
 
 class UsuarioUpdate(BaseModel):
     """
