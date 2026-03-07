@@ -46,75 +46,140 @@ GoalApp/
 └── README.md                   # Este archivo
 ```
 
-## 🚀 Instalación y Configuración
+## 🚀 Instalación y Configuración (Actualizada)
 
-### 1. Requisitos Previos
+Esta guía está pensada para que puedas poner en marcha **GoalApp** tanto en **Windows** como en **Ubuntu** (Linux) usando un **entorno virtual** y con los últimos ajustes necesarios (bcrypt, variables de entorno, puertos, etc.).
 
-- Python 3.10 o superior
-- MySQL 8.0 o superior
-- pip (gestor de paquetes Python)
+> **Requisitos mínimos**
+> 
+> - Python ≥ 3.10 (idealmente 3.13, que es la versión que tienes instalada)
+> - MySQL ≥ 8.0
+> - `git` (para clonar el repo)
+> - `pip` (gestor de paquetes)
 
-### 2. Clonar el Repositorio
+---
 
-```bash
+### 1️⃣ Preparar el entorno del proyecto
+
+#### a) Clonar el repositorio
+
+``` bash
 git clone https://github.com/1DAM-antoniocue491/GoalApp.git
-cd GoalApp
+cd GoalApp/backend
+```
+#### b) Crear y activar un entorno virtual
+
+``` PowerShell
+--- Ubuntu / Linux ---------------------------------------
+python3 -m venv .venv # crear el entorno (solo la 1ª vez)
+source .venv/bin/activate # activar
+
+--- Windows PowerShell ----------------------------------- python -m venv .venv # crear el entorno (solo la 1ª vez)
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass # permite scripts
+.\.venv\Scripts\Activate.ps1 # activar
 ```
 
-### 3. Instalar Dependencias
+> Cuando el entorno está activo el prompt mostrará `(.venv)` al inicio.
 
-```bash
-cd backend
+#### c) Actualizar `pip` e instalar dependencias
+
+``` python
+pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
 ```
 
-### 4. Configurar Base de Datos
+> **Problemas con `bcrypt` o `cryptography`**  
+> En Ubuntu instala los paquetes de compilación antes de `pip install`:
 
-#### Crear la base de datos en MySQL:
-
-```sql
-mysql -u <user> -p
-CREATE DATABASE futbol_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+``` bash
+sudo apt update
+sudo apt install -y build-essential libffi-dev libssl-dev python3-dev
 ```
 
-#### Ejecutar script de inicialización:
+> En Windows asegúrate de tener **Microsoft Visual C++ Build Tools** instalados (el instalador de Visual Studio Community incluye la opción _Desktop development with C++_).
 
-```bash
-mysql -u <user> -p futbol_app < app/database/init.sql
+---
+
+### 2️⃣ Configurar la base de datos MySQL
+
+#### a) Crear la base de datos
+
+``` mysql
+-- Desde la consola MySQL
+mysql -u <usuario> -p CREATE DATABASE futbol_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+#### b) Ejecutar el script de inicialización
+
+``` bash
+mysql -u <usuario> -p futbol_app < app/database/init.sql
 ```
 
-### 5. Configurar Variables de Entorno
+> El script crea las tablas `usuarios`, `roles`, `usuario_rol`, etc.
 
-El archivo `.env` ya está creado en `backend/.env`. Solo necesitas editar las credenciales:
+---
 
-```bash
-# Editar el archivo .env
-notepad .env  # Windows
-nano .env     # Linux/Mac
+### 3️⃣ Variables de entorno (`.env`)
+
+El proyecto ya incluye un archivo `backend/.env.example`.
+
+> **Importante:** Debes renombrar el fichero `.env.example` y ponerle el nombre de `.env`, si no, no se podrán obtener los datos.
+
+Edítalo para añadir tus credenciales de base de datos y, si lo deseas, cambiar la clave secreta.
+
+``` bash
+# Windows
+notepad .env
+# Linux / macOS
+nano .env
 ```
 
-Cambia la línea de `DATABASE_URL` con tus credenciales:
+> **Importante:** `HOST=0.0.0.0` permite que la API sea accesible desde otros equipos de la red.
 
-```env
-DATABASE_URL=mysql+pymysql://tu_usuario:tu_password@localhost:3306/futbol_app
+---
+
+### 4️⃣ Abrir el puerto 8000 (si usas firewall)
+
+#### Windows (PowerShell)
+
+``` PowerShell
+New-NetFirewallRule -DisplayName "GoalApp API" -Direction Inbound -Protocol TCP -LocalPort 8000 -Action Allow
+```
+#### Ubuntu (UFW)
+
+``` bash
+sudo ufw allow 8000/tcp
+sudo ufw reload
 ```
 
-**Nota:** El archivo `.env` contiene una SECRET_KEY segura ya generada. No la cambies a menos que sea necesario.
+> Si utilizas otro firewall (iptables, firewalld, etc.) abre el puerto de forma equivalente.
 
-### 6. Iniciar el Servidor
+---
 
-```bash
-# Asegúrate de estar en el directorio backend/
+### 5️⃣ Lanzar el servidor
+
+Con el entorno virtual **activo** y el archivo `.env` configurado:
+
+**Opción 1:** usando Uvicorn (recomendado, permite hot‑reload)
+``` python
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+- `--reload` recarga automáticamente el servidor cuando cambias código (solo para desarrollo).
+- En producción elimina `--reload` y considera usar un servidor ASGI como **Gunicorn** detrás de **Nginx** o **Caddy**.
+
+**Opción 2:** usando el script incluido (para desarrollo rápido)
+``` python
 python app/main.py
 ```
 
-O alternativamente:
+**URL de la API**
 
-```bash
-uvicorn app.main:app --reload
+```
+http://<IP_DE_TU_MÁQUINA>:8000
 ```
 
-El servidor estará disponible en: **http://localhost:8000**
+- En la misma máquina: `http://localhost:8000`
+- Desde otro equipo de la red: sustituye `<IP_DE_TU_MÁQUINA>` por la dirección IPv4 que obtengas con `ipconfig` (Windows) o `ip a` (Linux).
 
 ## 🧪 Probar la API
 

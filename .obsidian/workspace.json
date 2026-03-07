@@ -27,7 +27,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "frontend/web/README.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               },
@@ -202,14 +202,12 @@
   "lastOpenFiles": [
     "frontend/phone/README.md",
     "frontend/web/README.md",
-    "frontend/phone",
-    "frontend/web/phone",
-    "frontend/movile/README.md",
     "README.md",
-    "frontend/movile",
-    "frontend/web",
-    "frontend",
+    "backend/Peticiones.md",
     "backend/README.md",
+    "frontend/web",
+    "frontend/phone",
+    "frontend",
     "reuniones/2026-03-02.md",
     "reuniones",
     "backend/TESTING.md",
@@ -217,6 +215,8 @@
     "backend/app/api/dependencies.py.txt",
     "backend/app/api/Nuevo documento de texto.txt",
     "backend/app/api",
-    "GoalApp/README.md"
+    "backend/app/Nueva carpeta",
+    "GoalApp/README.md",
+    "GoalApp"
   ]
 }

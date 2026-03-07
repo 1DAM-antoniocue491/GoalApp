@@ -29,6 +29,32 @@ class UsuarioCreate(UsuarioBase):
     """
     contraseña: str = Field(..., min_length=6)  # Se almacenará como hash en la base de datos
 
+    # --------------------------------------------------------------
+    # Validador personalizado de Pydantic.
+    # Se ejecuta automáticamente después de que los campos básicos
+    # hayan sido validados (tipo, longitud mínima, etc.).
+    # --------------------------------------------------------------
+    @validator("contraseña")
+    def validar_longitud_maxima(cls, v: str) -> str:
+        """
+        bcrypt solo permite contraseñas de **≤ 72 bytes**.
+        Este método verifica que la cadena codificada en UTF‑8 no supere
+        ese límite. Si la supera, lanzamos un `ValueError`; FastAPI
+        transformará esa excepción en una respuesta HTTP 422 con el
+        mensaje correspondiente.
+        """
+        max_bytes = 72                     # Límite impuesto por bcrypt
+        # Convertimos la cadena a bytes para contar el número real de bytes.
+        # Los caracteres multibyte (por ejemplo, emojis) pueden ocupar
+        # más de un byte, por eso usamos `encode('utf-8')`.
+        if len(v.encode("utf-8")) > max_bytes:
+            raise ValueError(
+                f"La contraseña no puede superar los {max_bytes} bytes "
+                "(≈ 72 caracteres ASCII)."
+            )
+        # Si todo está bien, devolvemos la contraseña tal cual.
+        return v
+
 class UsuarioUpdate(BaseModel):
     """
     Schema para actualizar un usuario existente.
