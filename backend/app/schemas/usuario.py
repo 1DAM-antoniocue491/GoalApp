@@ -38,7 +38,6 @@ class UsuarioCreate(UsuarioBase):
     # hayan sido validados (tipo, longitud mínima, etc.).
     # --------------------------------------------------------------
     @field_validator("contraseña")
-    @classmethod
     def validar_longitud_maxima(cls, v: str) -> str:
         """
         bcrypt solo permite contraseñas de **≤ 72 bytes**.
