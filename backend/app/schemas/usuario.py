@@ -2,7 +2,7 @@
 Schemas de validación para el recurso Usuario.
 Define los modelos Pydantic para request/response de la API relacionados con usuarios del sistema.
 """
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, validator
 from datetime import datetime
 
 class UsuarioBase(BaseModel):
