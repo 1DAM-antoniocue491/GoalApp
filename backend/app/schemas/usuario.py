@@ -54,6 +54,12 @@ class UsuarioCreate(UsuarioBase):
             )
         # Si todo está bien, devolvemos la contraseña tal cual.
         return v
+    
+    class Config:
+        # Con esta opción el modelo acepta **ambos** nombres:
+        #   - "password"
+        #   - "contraseña"
+        allow_population_by_field_name = True
 
 class UsuarioUpdate(BaseModel):
     """
