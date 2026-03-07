@@ -29,6 +29,7 @@ def hash_password(password: str) -> str:
     Returns:
         str: Hash de la contraseña
     """
+    console.debug(f"Contraseña que se va a hashear: {password}")
     return pwd_context.hash(password)
 
 
