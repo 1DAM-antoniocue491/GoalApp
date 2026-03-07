@@ -27,8 +27,11 @@ class UsuarioCreate(UsuarioBase):
         email (EmailStr): Correo electrónico válido del usuario
         contraseña (str): Contraseña en texto plano (mínimo 6 caracteres, se hasheará en el servidor)
     """
-    contraseña: str = Field(..., min_length=6)  # Se almacenará como hash en la base de datos
-
+    password: str = Field(
+        ...,
+        min_length=6,                # longitud mínima que tú quieras
+        alias="contraseña",          # permite que el JSON use "contraseña"
+    )
     # --------------------------------------------------------------
     # Validador personalizado de Pydantic.
     # Se ejecuta automáticamente después de que los campos básicos

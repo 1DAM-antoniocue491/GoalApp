@@ -29,7 +29,6 @@ def hash_password(password: str) -> str:
     Returns:
         str: Hash de la contraseña
     """
-    logger.debug(f"{len(password)} caracteres, {len(password.encode('utf-8'))} bytes")
     return pwd_context.hash(password)
 
 
