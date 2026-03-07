@@ -44,7 +44,7 @@ def registrar_usuario (
     Roles permitidos: Público
     """
     try:
-        usuario = crear_usuario(db, datos)
+        usuario = crear_usuario(db, usuario)
         return usuario
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
