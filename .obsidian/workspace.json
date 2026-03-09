@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "backend/README.md",
+                "file": "frontend/web/README.md",
                 "mode": "source",
                 "source": false
               },
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "a01eb197697f0eaa",
@@ -184,5 +185,34 @@
     }
   },
   "active": "37e3d5b16518b008",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "frontend/web/goalapp-frontend/node_modules/enhanced-resolve/lib/ParsePlugin.js",
+    "frontend/web/goalapp-frontend/node_modules/enhanced-resolve/lib/NextPlugin.js",
+    "frontend/web/goalapp-frontend/node_modules/enhanced-resolve/lib/ModulesInRootPlugin.js",
+    "frontend/web/goalapp-frontend/node_modules/enhanced-resolve/lib/ModulesUtils.js",
+    "frontend/web/goalapp-frontend/node_modules/enhanced-resolve/lib/ModulesInHierarchicalDirectoriesPlugin.js",
+    "frontend/web/goalapp-frontend/node_modules/magic-string/package.json",
+    "frontend/web/goalapp-frontend/node_modules/lightningcss/package.json",
+    "frontend/web/goalapp-frontend/node_modules/@tailwindcss/node/package.json",
+    "frontend/web/goalapp-frontend/node_modules/react-icons/ci/index.d.ts",
+    "frontend/web/goalapp-frontend/node_modules/react-icons/cg/package.json",
+    "frontend/web/goalapp-frontend/node_modules/react-icons/gr/package.json",
+    "frontend/web/goalapp-frontend/src/assets/ray_icon.svg",
+    "frontend/web/goalapp-frontend/node_modules/react-router/LICENSE.md",
+    "frontend/web/goalapp-frontend/node_modules/react-router/README.md",
+    "frontend/web/goalapp-frontend/node_modules/react-router/CHANGELOG.md",
+    "frontend/web/goalapp-frontend/node_modules/cookie/README.md",
+    "frontend/web/goalapp-frontend/node_modules/set-cookie-parser/README.md",
+    "frontend/web/goalapp-frontend/node_modules/enhanced-resolve/README.md",
+    "frontend/web/goalapp-frontend/node_modules/jiti/README.md",
+    "frontend/web/goalapp-frontend/node_modules/magic-string/README.md",
+    "frontend/web/goalapp-frontend/node_modules/lightningcss/README.md",
+    "frontend/web/goalapp-frontend/node_modules/graceful-fs/README.md",
+    "frontend/web/goalapp-frontend/node_modules/detect-libc/README.md",
+    "frontend/web/goalapp-frontend/node_modules/@tailwindcss/vite/README.md",
+    "frontend/web/goalapp-frontend/node_modules/@tailwindcss/oxide-win32-x64-msvc/README.md",
+    "frontend/web/goalapp-frontend/node_modules/lightningcss-win32-x64-msvc/README.md",
+    "frontend/web/goalapp-frontend/src/assets/foco-auth.jpeg",
+    "backend/README.md"
+  ]
 }

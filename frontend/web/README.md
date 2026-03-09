@@ -31,7 +31,9 @@ my-football-app/
 │  │   │   │   ├─ RegisterPage.tsx  
 │  │   │   │   └─ ForgotPasswordPage.tsx  
 │  │   │   ├─ hooks/  
-│  │   │   │   └─ useAuth.ts  
+│  │   │   │   └─ useAuth.ts
+│  │   │   ├─ types/  
+│  │   │   │   └─ Interfaces.ts 
 │  │   │   └─ services/  
 │  │   │       └─ authApi.ts  
 │  │   ├─ users/  
@@ -44,6 +46,8 @@ my-football-app/
 │  │   │   │   └─ UserAvatar.tsx  
 │  │   │   ├─ hooks/  
 │  │   │   │   └─ useUsers.ts  
+│  │   │   ├─ types/  
+│  │   │   │   └─ Interfaces.ts 
 │  │   │   └─ services/  
 │  │   │       └─ usersApi.ts  
 │  │   ├─ players/  
@@ -55,12 +59,15 @@ my-football-app/
 │  │   │   │   └─ PlayerList.tsx  
 │  │   │   ├─ hooks/  
 │  │   │   │   └─ usePlayers.ts  
+│  │   │   ├─ types/  
+│  │   │   │   └─ Interfaces.ts 
 │  │   │   └─ services/  
 │  │   │       └─ playersApi.ts  
 │  │   └─ teams/               # Otro feature ejemplo  
 │  │       ├─ pages/  
 │  │       ├─ components/  
-│  │       ├─ hooks/  
+│  │       ├─ hooks/ 
+│  │       ├─ types/  
 │  │       └─ services/  
 │  ├─ hooks/                   # Hooks globales reutilizables  
 │  │   ├─ useFetch.ts  
