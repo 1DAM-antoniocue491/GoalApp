@@ -23,7 +23,10 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=UsuarioResponse)
-def registrar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
+def registrar_usuario (
+        usuario: UsuarioCreate,
+        db: Session = Depends(get_db)
+    ):
     """
     Registrar un nuevo usuario.
     
@@ -40,7 +43,11 @@ def registrar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     Requiere autenticación: No
     Roles permitidos: Público
     """
-    return crear_usuario(db, usuario)
+    try:
+        usuario = crear_usuario(db, usuario)
+        return usuario
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
 
 @router.get("/", response_model=list[UsuarioResponse], dependencies=[Depends(require_role("admin"))])
 def listar_usuarios(db: Session = Depends(get_db)):

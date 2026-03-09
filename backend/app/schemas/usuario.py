@@ -2,7 +2,7 @@
 Schemas de validación para el recurso Usuario.
 Define los modelos Pydantic para request/response de la API relacionados con usuarios del sistema.
 """
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime
 
 class UsuarioBase(BaseModel):
@@ -27,7 +27,42 @@ class UsuarioCreate(UsuarioBase):
         email (EmailStr): Correo electrónico válido del usuario
         contraseña (str): Contraseña en texto plano (mínimo 6 caracteres, se hasheará en el servidor)
     """
-    contraseña: str = Field(..., min_length=6)  # Se almacenará como hash en la base de datos
+    password: str = Field(
+        ...,
+        min_length=6,                # longitud mínima que tú quieras
+        alias="contraseña",          # permite que el JSON use "contraseña"
+    )
+    # --------------------------------------------------------------
+    # Validador personalizado de Pydantic.
+    # Se ejecuta automáticamente después de que los campos básicos
+    # hayan sido validados (tipo, longitud mínima, etc.).
+    # --------------------------------------------------------------
+    @field_validator("contraseña")
+    def validar_longitud_maxima(cls, v: str) -> str:
+        """
+        bcrypt solo permite contraseñas de **≤ 72 bytes**.
+        Este método verifica que la cadena codificada en UTF‑8 no supere
+        ese límite. Si la supera, lanzamos un `ValueError`; FastAPI
+        transformará esa excepción en una respuesta HTTP 422 con el
+        mensaje correspondiente.
+        """
+        max_bytes = 72                     # Límite impuesto por bcrypt
+        # Convertimos la cadena a bytes para contar el número real de bytes.
+        # Los caracteres multibyte (por ejemplo, emojis) pueden ocupar
+        # más de un byte, por eso usamos `encode('utf-8')`.
+        if len(v.encode("utf-8")) > max_bytes:
+            raise ValueError(
+                f"La contraseña no puede superar los {max_bytes} bytes "
+                "(≈ 72 caracteres ASCII)."
+            )
+        # Si todo está bien, devolvemos la contraseña tal cual.
+        return v
+    
+    class Config:
+        # Con esta opción el modelo acepta **ambos** nombres:
+        #   - "password"
+        #   - "contraseña"
+        validate_by_name = True
 
 class UsuarioUpdate(BaseModel):
     """
