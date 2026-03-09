@@ -189,7 +189,7 @@ LOG_LEVEL=INFO
 ### Instalacion de Dependencias
 
 ```bash
-# Crear entorno virtual (recomendado)
+# Crear entorno virtual
 python -m venv venv
 
 # Activar entorno virtual

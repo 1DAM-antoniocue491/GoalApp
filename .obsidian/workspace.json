@@ -27,7 +27,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "frontend/web/README.md",
+                "file": "backend/README.md",
                 "mode": "source",
                 "source": false
               },
@@ -200,8 +200,9 @@
   },
   "active": "212adc92dc7a24df",
   "lastOpenFiles": [
-    "frontend/phone/README.md",
     "frontend/web/README.md",
+    "backend/README.md",
+    "frontend/phone/README.md",
     "frontend/phone",
     "frontend/web/phone",
     "frontend/movile/README.md",
@@ -209,7 +210,6 @@
     "frontend/movile",
     "frontend/web",
     "frontend",
-    "backend/README.md",
     "reuniones/2026-03-02.md",
     "reuniones",
     "backend/TESTING.md",
