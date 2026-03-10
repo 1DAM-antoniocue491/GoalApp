@@ -1,9 +1,10 @@
 import React  from "react";
+import Nav from "../components/Nav";
 
 export default function DashboardPage() {
     return (
         <>
-        <h1>Esto es una prueba</h1>
+        <Nav />
         </>
     )
 }

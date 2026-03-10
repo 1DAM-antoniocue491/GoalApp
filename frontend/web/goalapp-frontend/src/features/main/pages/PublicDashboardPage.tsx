@@ -1,50 +1,21 @@
-import React  from "react";
-import { TfiCup } from "react-icons/tfi";
 import { AiOutlineThunderbolt } from "react-icons/ai";
-import { MdNavigateNext, MdOutlineSecurity, MdEmail } from "react-icons/md";
+import { MdNavigateNext, MdOutlineSecurity } from "react-icons/md";
 import { SiIndiansuperleague } from "react-icons/si";
 import { TbPlayFootball } from "react-icons/tb";
 import { CiCalendarDate } from "react-icons/ci";
 import { PiRankingBold, PiCirclesFourBold } from "react-icons/pi";
-import { FaPhoneAlt } from "react-icons/fa";
-import { FaLocationDot } from "react-icons/fa6";
 import { Link } from "react-router";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
 
 export default function PublicDashboardPage() {
     return (
         <>
-        
-        <header className="bg-zinc-900 h-16 flex flex-row justify-between items-center sm:border-b border-gray-700">
-            <div className="flex flex-row items-center justify-center gap-2 w-1/3">
-                <div className="bg-lime-300 p-2 rounded-md">
-                    <TfiCup />
-                </div>
-                <p className="text-white font-bold">GoalApp</p>
-            </div>
-            <div className="hidden sm:flex flex-row justify-center items-center gap-3 lg:gap-10 w-1/3">
-                <a href="#" className="text-gray-400 text-sm hover:text-lime-300">Ligas</a>
-                <a href="#" className="text-gray-400 text-sm hover:text-lime-300">Resultados</a>
-                <a href="#" className="text-gray-400 text-sm hover:text-lime-300">Calendario</a>
-                <a href="#" className="text-gray-400 text-sm hover:text-lime-300">Ranking</a>
-            </div>
-            <div className="flex flex-row justify-center items-center gap-3 lg:gap-5 w-1/3">
-                <Link to={'/login'} className="text-gray-400 text-sm">Login</Link>
-                <Link to={'/register'} className="bg-lime-300 px-2 py-1 rounded-md text-zinc-900 text-sm">Registro</Link>
-            </div>
-        </header>
-        <header className="bg-zinc-900 h-16 flex flex-row justify-between sm:hidden items-center border-b border-gray-700">
-            <div className="flex flex-row justify-center items-center gap-10 lg:gap-10 w-full">
-                <a href="#" className="text-gray-400 text-sm hover:text-lime-300">Ligas</a>
-                <a href="#" className="text-gray-400 text-sm hover:text-lime-300">Resultados</a>
-                <a href="#" className="text-gray-400 text-sm hover:text-lime-300">Calendario</a>
-                <a href="#" className="text-gray-400 text-sm hover:text-lime-300">Ranking</a>
-            </div>
-        </header>
-
-        <div className="gap-4 py-20 bg-gradient-to-br from-zinc-900 to-zinc-700 from-50% p-10 flex flex-col justify-center items-center">
-            <div className="flex flex-row items-center justify-center gap-2 bg-zinc-700 px-3 py-1 rounded-full text-sm text-zinc-300 border border-lime-300">
+        <Header />
+        <div className="gap-4 py-5 sm:py-20 bg-gradient-to-br from-zinc-900 to-zinc-700 from-50% p-5 sm:p-10 flex flex-col justify-center items-center">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 bg-zinc-700 px-3 py-1 rounded-full text-sm text-zinc-300 border border-lime-300">
                 <AiOutlineThunderbolt className="text-lime-300" />
-                <p>La mejor plataforma de gestión deportiva</p>
+                <p className="text-center sm:text-start">La mejor plataforma de gestión deportiva</p>
             </div>
 
             <div className="flex flex-col justify-center items-center">
@@ -57,12 +28,12 @@ export default function PublicDashboardPage() {
                 seguir resultados y mantener actualizados los rankings en tiempo real.
             </p>
 
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-col sm:flex-row w-full gap-2 sm: justify-center">
                 <Link to={'/register'} className="bg-lime-300 px-2 py-2 rounded-xl text-zinc-900 text-sm flex flex-row justify-center items-center font-semibold">
                     <p>Comenzar Ahora</p>
                     <MdNavigateNext />
                 </Link>
-                <Link to={'/login'} className="text-gray-300 border border-gray-400 text-sm py-2 px-5 rounded-xl font-semibold">Iniciar Sesión</Link>
+                <Link to={'/login'} className="text-gray-300 border border-gray-400 text-sm py-2 px-5 rounded-xl font-semibold text-center">Iniciar Sesión</Link>
             </div>
         </div>
 
@@ -70,7 +41,7 @@ export default function PublicDashboardPage() {
             <h3 className="text-xl text-white font-semibold">Todo lo que necesitas</h3>
             <p className="text-zinc-400 text-sm text-center">Herramientas profesionales para gestionar cada aspecto de tu liga deportiva</p>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 pt-4 sm:p-7 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 pt-4 sm:p-7 gap-2">
                 <div className="bg-zinc-800 flex flex-col justify-center items-center p-5 gap-2 rounded-lg">
                     <div className="bg-lime-300 p-2 rounded-md">
                         <SiIndiansuperleague />
@@ -103,11 +74,19 @@ export default function PublicDashboardPage() {
                     <p className="text-zinc-500 text-sm text-center">Tablas de posiciones y clasificaciones actualizadas automáticamente.</p>
                 </div>
             </div>
+
+            <div className="bg-zinc-700 p-5 rounded-2xl border-2 border-lime-300 flex flex-col lg:flex-row justify-center items-center gap-5">
+                <div className="flex flex-col justify-center items-center lg:items-start">
+                    <p className="text-white font-semibold">¿Necesitas ayuda para crear tu liga?</p>
+                    <p className="text-zinc-400 text-sm">Completa un formulario y nosotros nos encargamos de todo</p>
+                </div>
+                <Link to={'/comunication_form'} className="bg-lime-300 px-7 py-3 rounded-2xl font-semibold">Solicitar Liga</Link>
+            </div>
         </div>
 
-        <div className="bg-zinc-900 grid grid-cols-1 lg:grid-cols-2 justify-center p-10 lg:px-20 gap-5 lg:gap-20">
+        <div className="bg-zinc-900 grid grid-cols-1 sm:grid-cols-2 justify-center px-5 sm:px-10 py-10 lg:px-20 gap-5 lg:gap-20">
             <div>
-                <div className="flex flex-row justify-between items-end">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end">
                     <div className="flex flex-row items-center gap-1">
                         <PiCirclesFourBold className="text-lime-300 w-4 h-4"/>
                         <p className="text-white font-semibold">Resultados Recientes</p>
@@ -154,7 +133,7 @@ export default function PublicDashboardPage() {
                 </div>
             </div>
             <div>
-                <div className="flex flex-row justify-between items-end">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end">
                     <div className="flex flex-row items-center gap-1">
                         <PiCirclesFourBold className="text-lime-300 w-4 h-4"/>
                         <p className="text-white font-semibold">Próximos Partidos</p>
@@ -209,10 +188,10 @@ export default function PublicDashboardPage() {
         </div>
 
         <div className="bg-zinc-800 px-5 sm:px-20 lg:px-80 py-10 flex flex-col ga">
-            <div className="flex flex-row justify-between items-end">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end">
                 <div className="flex flex-row items-center gap-1">
                     <PiCirclesFourBold className="text-lime-300 w-4 h-4"/>
-                    <p className="text-white font-semibold">Próximos Partidos</p>
+                    <p className="text-white font-semibold">Clasificación</p>
                 </div>
                 <a href="#" className="text-cyan-600 text-sm hover:underline">Ver completa</a>
             </div>
@@ -254,44 +233,12 @@ export default function PublicDashboardPage() {
 
         <div className="bg-gradient-to-br from-lime-300 to-cyan-500 flex flex-col justify-center items-center gap-3 p-10">
             <MdOutlineSecurity className="w-10 h-10" />
-            <h3 className="font-bold text-white text-2xl">¿Listo para comenzar?</h3>
-            <p className="text-sm">Únete a miles de organizadores deportivos que ya confían en GoalApp</p>
+            <h3 className="font-bold text-white text-2xl text-center">¿Listo para comenzar?</h3>
+            <p className="text-sm text-center">Únete a miles de organizadores deportivos que ya confían en GoalApp</p>
             <Link to={'/register'} className="text-lime-300 bg-black py-2 px-5 rounded-xl">Crear Cuenta Gratis</Link>
         </div>
 
-        <footer className="bg-zinc-800 grid grid-cols-1 lg:grid-cols-3 justify-start items-start py-10 px-5 sm:px-30 gap-4">
-            <div className="flex flex-col justify-center items-start gap-2 p-2">
-                <div className="flex flex-row items-center justify-start gap-2 w-1/3">
-                    <div className="bg-lime-300 p-1 rounded-md">
-                        <TfiCup className="w-3"/>
-                    </div>
-                    <p className="text-white font-semibold text-sm">GoalApp</p>
-                </div>
-                <p className="text-zinc-500 text-sm pl-6 lg:pl-0">Plataforma integral de giestión deportiva para ligas, equipos y jugadores.</p>
-            </div>
-            <div className="flex flex-col justify-center items-start gap-2 p-2">
-                <p className="text-white font-semibold text-sm">Contacto</p>
-                <div className="flex flex-row justify-center items-center gap-1 pl-6 lg:pl-0">
-                    <MdEmail className="text-zinc-500 w-5 h-5" />
-                    <p className="text-zinc-500 text-sm">info@sportmanager.com</p>
-                </div>
-                <div className="flex flex-row justify-center items-center gap-1 pl-6 lg:pl-0">
-                    <FaPhoneAlt className="text-zinc-500 w-5 h-5" />
-                    <p className="text-zinc-500 text-sm">+1 (234) 567-890</p>
-                </div>
-                <div className="flex flex-row justify-center items-center gap-1 pl-6 lg:pl-0">
-                    <FaLocationDot className="text-zinc-500 w-5 h-5" />
-                    <p className="text-zinc-500 text-sm">Av. Deportiva 123, Ciudad Deportiva</p>
-                </div>
-            </div>
-            <div className="flex flex-col justify-center items-start gap-1 p-2">
-                <p className="text-white font-semibold text-sm">Enlaces Rápidos</p>
-                <a href="#" className="text-zinc-500 text-sm pl-6 lg:pl-0">Acerca de</a>                
-                <a href="#" className="text-zinc-500 text-sm pl-6 lg:pl-0">Términos y Condiciones</a>                
-                <a href="#" className="text-zinc-500 text-sm pl-6 lg:pl-0">Poítica de Privacidad</a>                
-                <a href="#" className="text-zinc-500 text-sm pl-6 lg:pl-0">Ayuda</a>                
-            </div>
-        </footer>
+        <Footer />
         </>
     )
 }
