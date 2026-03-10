@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "reuniones/2026-03-09.md",
+                "file": "backend/IMPLEMENTACION_JWT.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2026-03-09"
+              "title": "IMPLEMENTACION_JWT"
             }
           }
         ]
@@ -185,8 +185,18 @@
   },
   "active": "eba20a0e6b1482be",
   "lastOpenFiles": [
-    "reuniones/2026-03-02.md",
+    "CLAUDE.md",
+    "backend/IMPLEMENTACION_JWT.md",
+    "backend/INFORME_SEGURIDAD_AUTENTICACION.md",
+    "CLAUDE.md.tmp.10824.1773172872926",
+    "backend/ERRORES_SEGURIDAD_AUTENTICACION.md",
+    "ERRORES_SEGURIDAD_AUTENTICACION.md",
+    "ERRORES_SEGURIDAD_AUTENTICACION.md.tmp.10824.1773172752764",
     "reuniones/2026-03-09.md",
+    "doc/backend/INFORME_SEGURIDAD_AUTENTICACION.md",
+    "frontend/phone/README.md",
+    "reuniones/2026-03-10.md",
+    "reuniones/2026-03-02.md",
     "frontend/web/README.md",
     "backend/README.md",
     "backend/Peticiones.md",
@@ -198,8 +208,6 @@
     "frontend/web/goalapp-frontend/node_modules/magic-string/package.json",
     "frontend/web/goalapp-frontend/node_modules/lightningcss/package.json",
     "frontend/web/goalapp-frontend/node_modules/@tailwindcss/node/package.json",
-    "frontend/web/goalapp-frontend/node_modules/react-icons/ci/index.d.ts",
-    "frontend/web/goalapp-frontend/node_modules/react-icons/cg/package.json",
     "frontend/web/goalapp-frontend/src/assets/ray_icon.svg",
     "frontend/web/goalapp-frontend/node_modules/react-router/LICENSE.md",
     "frontend/web/goalapp-frontend/node_modules/react-router/README.md",
@@ -214,7 +222,6 @@
     "frontend/web/goalapp-frontend/node_modules/detect-libc/README.md",
     "frontend/web/goalapp-frontend/node_modules/@tailwindcss/vite/README.md",
     "frontend/web/goalapp-frontend/node_modules/@tailwindcss/oxide-win32-x64-msvc/README.md",
-    "frontend/web/goalapp-frontend/node_modules/lightningcss-win32-x64-msvc/README.md",
     "frontend/web/goalapp-frontend/src/assets/foco-auth.jpeg"
   ]
 }

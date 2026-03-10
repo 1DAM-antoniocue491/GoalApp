@@ -23,7 +23,7 @@ export default function LoginPage() {
             </div>
 
             <div className="bg-zinc-950 flex justify-center items-center h-full w-full md:w-1/2">
-                <div className="bg-zinc-800 p-4 rounded-lg flex flex-col justify-center gap-9 sm:w-3/5">
+                <div className="bg-zinc-800 p-3 sm:p-10 rounded-xl flex flex-col justify-center gap-9 sm:w-3/5">
                     <div>
                         <Link to={'/'} className="text-lime-300 font-semibold mb-3">GoalApp</Link>
                         <h2 className="text-white text-2xl font-semibold">Bienvenido</h2>
@@ -66,7 +66,7 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <div className="mt-34 mb-0.5">
+                    <div className="">
                         <button className="w-full py-2 text-sm bg-lime-300 rounded-full font-semibold">Acceder</button>
                         <Link to={'/send-email'} className="block text-center text-[13px] text-blue-500 hover:underline mt-2">Olvidé mi contraseña</Link>
                     </div>

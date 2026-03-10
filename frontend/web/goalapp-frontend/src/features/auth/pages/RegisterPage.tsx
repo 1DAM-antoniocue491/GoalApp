@@ -24,10 +24,11 @@ export default function RegisterPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-zinc-950 from-30%"></div> 
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-950 from-30%"></div> 
+                <div className="absolute inset-0 bg-gradient-to-t from-transparent to-zinc-950 from-30%"></div> 
             </div>
 
             <div className="bg-zinc-950 flex justify-center items-center h-full w-full md:w-1/2 ">
-                <div className="bg-zinc-800 p-4 rounded-lg flex flex-col justify-center gap-9 sm:w-3/5">
+                <div className="bg-zinc-800 p-3 sm:p-10 rounded-lg flex flex-col justify-center gap-9 sm:w-3/5">
                     <div>
                         <Link to={'/login'} className="text-lime-300 font-semibold mb-3">GoalApp</Link>
                         <h2 className="text-white text-2xl font-semibold">Bienvenido</h2>
