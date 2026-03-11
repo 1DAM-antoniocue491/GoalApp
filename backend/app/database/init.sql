@@ -15,6 +15,9 @@ CREATE TABLE usuarios (
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     contraseña_hash VARCHAR(255) NOT NULL,
+    genero ENUM('masculino', 'femenino', 'otro') NULL,
+    telefono VARCHAR(20) NULL,
+    fecha_nacimiento DATE NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -52,6 +55,21 @@ CREATE TABLE ligas (
     temporada VARCHAR(20) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- ============================================
+--   TABLA: liga_configuracion
+-- ============================================
+CREATE TABLE liga_configuracion (
+    id_configuracion INT AUTO_INCREMENT PRIMARY KEY,
+    id_liga INT NOT NULL UNIQUE,
+    hora_partidos TIME NOT NULL DEFAULT '17:00:00',
+    max_equipos INT NOT NULL DEFAULT 20,
+    min_jugadores_equipo INT NOT NULL DEFAULT 7,
+    min_partidos_entre_equipos INT NOT NULL DEFAULT 2,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_liga) REFERENCES ligas(id_liga) ON DELETE CASCADE
 );
 
 -- ============================================
@@ -207,6 +225,6 @@ CREATE TABLE notificaciones (
 INSERT INTO roles (nombre, descripcion) VALUES
     ('admin', 'Administrador del sistema con acceso total'),
     ('coach', 'Entrenador de equipo'),
-    ('player', 'Jugador'),
+    ('player', 'Jugador'), 
     ('viewer', 'Visualizador de información pública'),
     ('delegate', 'Delegado de equipo');

@@ -5,17 +5,18 @@ nombres y temporadas.
 """
 from sqlalchemy.orm import Session
 from app.models.liga import Liga
+from app.models.liga_configuracion import LigaConfiguracion
 from app.schemas.liga import LigaCreate, LigaUpdate
 
 
 def crear_liga(db: Session, datos: LigaCreate):
     """
-    Crea una nueva liga en la base de datos.
-    
+    Crea una nueva liga en la base de datos y su configuración por defecto.
+
     Args:
         db (Session): Sesión de base de datos SQLAlchemy
         datos (LigaCreate): Datos de la liga (nombre y temporada)
-    
+
     Returns:
         Liga: Objeto Liga creado con su ID asignado
     """
@@ -24,6 +25,12 @@ def crear_liga(db: Session, datos: LigaCreate):
         temporada=datos.temporada
     )
     db.add(liga)
+    db.flush()  # Obtener el ID de la liga sin hacer commit
+
+    # Crear configuración por defecto
+    configuracion = LigaConfiguracion(id_liga=liga.id_liga)
+    db.add(configuracion)
+
     db.commit()
     db.refresh(liga)
     return liga
@@ -32,10 +39,10 @@ def crear_liga(db: Session, datos: LigaCreate):
 def obtener_ligas(db: Session):
     """
     Obtiene todas las ligas registradas.
-    
+
     Args:
         db (Session): Sesión de base de datos SQLAlchemy
-    
+
     Returns:
         list[Liga]: Lista con todas las ligas
     """
@@ -45,11 +52,11 @@ def obtener_ligas(db: Session):
 def obtener_liga_por_id(db: Session, liga_id: int):
     """
     Busca una liga por su ID.
-    
+
     Args:
         db (Session): Sesión de base de datos SQLAlchemy
         liga_id (int): ID de la liga a buscar
-    
+
     Returns:
         Liga: Objeto Liga si existe, None si no se encuentra
     """
@@ -59,15 +66,15 @@ def obtener_liga_por_id(db: Session, liga_id: int):
 def actualizar_liga(db: Session, liga_id: int, datos: LigaUpdate):
     """
     Actualiza los datos de una liga existente.
-    
+
     Args:
         db (Session): Sesión de base de datos SQLAlchemy
         liga_id (int): ID de la liga a actualizar
         datos (LigaUpdate): Datos a actualizar (nombre y/o temporada)
-    
+
     Returns:
         Liga: Objeto Liga actualizado
-    
+
     Raises:
         ValueError: Si la liga no existe
     """
@@ -90,11 +97,11 @@ def actualizar_liga(db: Session, liga_id: int, datos: LigaUpdate):
 def eliminar_liga(db: Session, liga_id: int):
     """
     Elimina una liga de la base de datos.
-    
+
     Args:
         db (Session): Sesión de base de datos SQLAlchemy
         liga_id (int): ID de la liga a eliminar
-    
+
     Raises:
         ValueError: Si la liga no existe
     """

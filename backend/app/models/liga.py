@@ -22,6 +22,7 @@ class Liga(Base):
         created_at (datetime): Fecha y hora de creación del registro
         updated_at (datetime): Fecha y hora de última actualización
         equipos (list): Lista de equipos en la liga (relación 1:N)
+        configuracion (LigaConfiguracion): Configuración de la liga (relación 1:1)
     """
     __tablename__ = "ligas"
 
@@ -38,3 +39,4 @@ class Liga(Base):
 
     # Relaciones
     equipos = relationship("Equipo", back_populates="liga", lazy="selectin")
+    configuracion = relationship("LigaConfiguracion", back_populates="liga", uselist=False, lazy="selectin")

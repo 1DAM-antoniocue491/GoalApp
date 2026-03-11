@@ -18,6 +18,7 @@ from .api.routers import (
     equipos,
     jugadores,
     ligas,
+    liga_configuracion,
     partidos,
     eventos,
     formaciones,
@@ -116,6 +117,12 @@ app.include_router(
     ligas.router,
     prefix="/api/v1",
     tags=["Ligas"]
+)
+
+app.include_router(
+    liga_configuracion.router,
+    prefix="/api/v1",
+    tags=["Configuración de Liga"]
 )
 
 app.include_router(

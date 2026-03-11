@@ -138,15 +138,15 @@ def obtener_usuario_por_id(db: Session, usuario_id: int):
 def actualizar_usuario(db: Session, usuario_id: int, datos: UsuarioUpdate):
     """
     Actualiza los datos de un usuario existente.
-    
+
     Args:
         db (Session): Sesión de base de datos SQLAlchemy
         usuario_id (int): ID del usuario a actualizar
-        datos (UsuarioUpdate): Datos a actualizar (nombre, email y/o contraseña)
-    
+        datos (UsuarioUpdate): Datos a actualizar (nombre, email, contraseña, genero, telefono, fecha_nacimiento)
+
     Returns:
         Usuario: Objeto Usuario actualizado
-    
+
     Raises:
         ValueError: Si el usuario no existe o el email ya está en uso
     """
@@ -154,9 +154,11 @@ def actualizar_usuario(db: Session, usuario_id: int, datos: UsuarioUpdate):
     if not usuario:
         raise ValueError("Usuario no encontrado")
 
+    # Actualizar nombre
     if datos.nombre is not None:
         usuario.nombre = datos.nombre
 
+    # Actualizar email
     if datos.email is not None:
         # Verificar que el nuevo email sea único (excluyendo el usuario actual)
         existente = db.query(Usuario).filter(
@@ -167,12 +169,22 @@ def actualizar_usuario(db: Session, usuario_id: int, datos: UsuarioUpdate):
             raise ValueError("El email ya está en uso")
         usuario.email = datos.email
 
-    # Nota: UsuarioCreate usa campo 'password' con alias 'contraseña'
-    # UsuarioUpdate usa campo 'contraseña' directamente
+    # Actualizar contraseña
     password_value = getattr(datos, 'password', None) or getattr(datos, 'contraseña', None)
     if password_value is not None:
-        # Hashear la nueva contraseña
         usuario.contraseña_hash = hash_password(password_value)
+
+    # Actualizar género
+    if datos.genero is not None:
+        usuario.genero = datos.genero
+
+    # Actualizar teléfono
+    if datos.telefono is not None:
+        usuario.telefono = datos.telefono
+
+    # Actualizar fecha de nacimiento
+    if datos.fecha_nacimiento is not None:
+        usuario.fecha_nacimiento = datos.fecha_nacimiento
 
     db.commit()
     db.refresh(usuario)
