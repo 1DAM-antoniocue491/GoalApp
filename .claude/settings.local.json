@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd C:/Users/Antonio/Desktop/GoalApp/backend && .\\\\.venv\\\\Scripts\\\\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload)",
+      "Bash(sleep 5 && curl -X POST \"http://localhost:8000/api/v1/usuarios/\" -H \"Content-Type: application/json\" -d \"{\\\\\"nombre\\\\\": \\\\\"Antonio Cuevas López\\\\\", \\\\\"email\\\\\": \\\\\"antonio@gmail.com\\\\\", \\\\\"password\\\\\": \\\\\"123456789\\\\\"}\")",
+      "Bash(cd C:/Users/Antonio/Desktop/GoalApp/backend && .\\\\.venv\\\\Scripts\\\\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload 2>&1)",
+      "Bash(cd C:/Users/Antonio/Desktop/GoalApp/backend && .\\\\.venv\\\\Scripts\\\\python.exe -c \"from app.main import app; print\\('Import successful'\\)\")",
+      "Bash(cd /c/Users/Antonio/Desktop/GoalApp/backend && .venv/Scripts/python.exe -c \"from app.main import app; print\\('Import successful'\\)\")",
+      "Bash(sleep 8 && curl -s -X POST \"http://localhost:8000/api/v1/usuarios/\" -H \"Content-Type: application/json\" -d '{\"nombre\": \"Antonio Cuevas López\", \"email\": \"antonio@gmail.com\", \"password\": \"123456789\"}')",
+      "Bash(curl -s -X POST \"http://127.0.0.1:8000/api/v1/usuarios/\" -H \"Content-Type: application/json\" -d '{\"nombre\": \"Antonio Cuevas López\", \"email\": \"antonio@gmail.com\", \"password\": \"123456789\"}')",
+      "Bash(.venv/Scripts/python.exe -c \"from app.main import app; print\\('Import successful'\\)\")",
+      "Bash(curl -v -X POST \"http://127.0.0.1:8000/api/v1/usuarios/\" -H \"Content-Type: application/json\" -d '{\"nombre\": \"Antonio\", \"email\": \"antonio@gmail.com\", \"password\": \"123456789\"}')",
+      "Bash(pkill -f uvicorn 2>/dev/null || true)",
+      "Bash(netstat -ano | grep \":8000\" | head -5)",
+      "Bash(taskkill //F //PID 4900 2>/dev/null; taskkill //F //PID 1856 2>/dev/null; sleep 2)",
+      "Bash(.venv/Scripts/pip.exe list:*)",
+      "Bash(.venv/Scripts/pip.exe install:*)",
+      "Bash(taskkill //F //PID 8088 2>/dev/null; sleep 2)",
+      "Bash(ls -la /c/Users/Antonio/Desktop/GoalApp/backend/*.db 2>/dev/null || ls -la /c/Users/Antonio/Desktop/GoalApp/backend/test_futbol_app.db 2>/dev/null)",
+      "Bash(ping -c 2 192.168.1.228 2>&1 || echo \"No se puede alcanzar el servidor\")",
+      "Bash(timeout 5 bash -c 'cat < /dev/null > /dev/tcp/192.168.1.228/3306' 2>&1 && echo \"Puerto 3306 abierto\" || echo \"No se puede conectar al puerto 3306\")",
+      "Bash(taskkill //F //IM python.exe 2>/dev/null; sleep 2)",
+      "Bash(curl -s -X POST \"http://127.0.0.1:8000/api/v1/auth/login\" \\\\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\\\n  -d \"username=antonio@gmail.com&password=123456789\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzczMjU4MjQ5fQ.XhnknSdeH5j-47gCAyJL6bZYWFWDIty3vhkjUYbfRcA\"\n\ncurl -s -X GET \"http://127.0.0.1:8000/api/v1/auth/me\" \\\\\n  -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzczMjU4MjQ5fQ.XhnknSdeH5j-47gCAyJL6bZYWFWDIty3vhkjUYbfRcA\"\n\ncurl -s -X POST \"http://127.0.0.1:8000/api/v1/auth/refresh?token=$TOKEN\")",
+      "Bash(curl -s -X POST \"http://127.0.0.1:8000/api/v1/auth/login\" \\\\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\\\n  -d \"username=antonio@gmail.com&password=password_incorrecta\")",
+      "Bash(curl -s -X POST \"http://127.0.0.1:8000/api/v1/auth/login\" \\\\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\\\n  -d \"usuario=noexiste@gmail.com&password=123456789\")"
+    ]
+  }
+}

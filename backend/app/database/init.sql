@@ -200,3 +200,13 @@ CREATE TABLE notificaciones (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
+
+-- ============================================
+--   DATOS INICIALES: ROLES
+-- ============================================
+INSERT INTO roles (nombre, descripcion) VALUES
+    ('admin', 'Administrador del sistema con acceso total'),
+    ('coach', 'Entrenador de equipo'),
+    ('player', 'Jugador'),
+    ('viewer', 'Visualizador de información pública'),
+    ('delegate', 'Delegado de equipo');

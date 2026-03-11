@@ -98,7 +98,7 @@ def crear_usuario(db: Session, datos: UsuarioCreate):
     usuario = Usuario(
         nombre=datos.nombre,
         email=datos.email,
-        contraseña_hash=hash_password(datos.contraseña)
+        contraseña_hash=hash_password(datos.password)
     )
 
     db.add(usuario)
@@ -167,9 +167,12 @@ def actualizar_usuario(db: Session, usuario_id: int, datos: UsuarioUpdate):
             raise ValueError("El email ya está en uso")
         usuario.email = datos.email
 
-    if datos.contraseña is not None:
+    # Nota: UsuarioCreate usa campo 'password' con alias 'contraseña'
+    # UsuarioUpdate usa campo 'contraseña' directamente
+    password_value = getattr(datos, 'password', None) or getattr(datos, 'contraseña', None)
+    if password_value is not None:
         # Hashear la nueva contraseña
-        usuario.contraseña_hash = hash_password(datos.contraseña)
+        usuario.contraseña_hash = hash_password(password_value)
 
     db.commit()
     db.refresh(usuario)
