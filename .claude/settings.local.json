@@ -24,7 +24,11 @@
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzczMjU4MjQ5fQ.XhnknSdeH5j-47gCAyJL6bZYWFWDIty3vhkjUYbfRcA\"\n\ncurl -s -X GET \"http://127.0.0.1:8000/api/v1/auth/me\" \\\\\n  -H \"Authorization: Bearer $TOKEN\")",
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzczMjU4MjQ5fQ.XhnknSdeH5j-47gCAyJL6bZYWFWDIty3vhkjUYbfRcA\"\n\ncurl -s -X POST \"http://127.0.0.1:8000/api/v1/auth/refresh?token=$TOKEN\")",
       "Bash(curl -s -X POST \"http://127.0.0.1:8000/api/v1/auth/login\" \\\\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\\\n  -d \"username=antonio@gmail.com&password=password_incorrecta\")",
-      "Bash(curl -s -X POST \"http://127.0.0.1:8000/api/v1/auth/login\" \\\\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\\\n  -d \"usuario=noexiste@gmail.com&password=123456789\")"
+      "Bash(curl -s -X POST \"http://127.0.0.1:8000/api/v1/auth/login\" \\\\\n  -H \"Content-Type: application/x-www-form-urlencoded\" \\\\\n  -d \"usuario=noexiste@gmail.com&password=123456789\")",
+      "Bash(.venv/Scripts/python.exe generar_datos_ejemplo.py 2>&1)",
+      "Bash(.venv/Scripts/python.exe -c \"from app.models.usuario import Usuario; from app.schemas.usuario import UsuarioCreate, UsuarioUpdate, UsuarioResponse, GeneroEnum; print\\('Importacion correcta'\\); print\\(f'Campos Usuario: {[c.name for c in Usuario.__table__.columns]}'\\); print\\(f'GeneroEnum: {[e.value for e in GeneroEnum]}'\\)\")",
+      "Bash(.venv/Scripts/python.exe -c \"from app.api.routers.eventos import router; from app.api.services.evento_service import crear_evento; print\\('Importaciones correctas'\\)\")",
+      "Bash(.venv/Scripts/python.exe -c \"\nfrom app.models.liga import Liga\nfrom app.models.liga_configuracion import LigaConfiguracion\nfrom app.schemas.liga_configuracion import LigaConfiguracionCreate, LigaConfiguracionResponse\nfrom app.api.services.liga_configuracion_service import crear_configuracion_por_defecto\nfrom app.api.routers.liga_configuracion import router\nprint\\('Todas las importaciones correctas'\\)\n\")"
     ]
   }
 }

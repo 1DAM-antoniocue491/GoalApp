@@ -30,7 +30,6 @@
 | `telefono`         | VARCHAR(20) | Número de teléfono con validación de formato   | Pendiente |
 | `fecha_nacimiento` | DATE        | Fecha de nacimiento del usuario                | Pendiente |
 
-
 ### Tareas Backend
 
 - [ ] Crear migración Alembic para nuevos campos
