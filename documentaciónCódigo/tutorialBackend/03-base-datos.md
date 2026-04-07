@@ -1,271 +1,338 @@
-# Base de Datos
+# Base de Datos (Para Principiantes)
 
-## Conexión
+## ¿Qué es una Base de Datos?
 
-### `database/connection.py`
+Imagina que tienes una **nevera gigante** donde guardas cosas. Pero no tiras todo al azar. Tienes **cajas organizadas**:
+
+```
+┌─────────────────────────────────────────────────────┐
+│                     NEVERA                           │
+├─────────────────────────────────────────────────────┤
+│  📦 Caja de Usuarios                                 │
+│     ├── Usuario 1: Juan, juan@email.com             │
+│     ├── Usuario 2: María, maria@email.com           │
+│     └── Usuario 3: Pedro, pedro@email.com           │
+│                                                      │
+│  📦 Caja de Equipos                                  │
+│     ├── Equipo 1: Real Madrid                        │
+│     └── Equipo 2: Barcelona                          │
+│                                                      │
+│  📦 Caja de Partidos                                 │
+│     └── Partido 1: Real Madrid vs Barcelona         │
+└─────────────────────────────────────────────────────┘
+```
+
+**Una base de datos es igual:** organizas la información en **tablas** (cajas) con **filas** (elementos) y **columnas** (características).
+
+---
+
+## SQL vs ORM
+
+### ¿Qué es SQL?
+
+**SQL** es el idioma que habla la base de datos:
+
+```sql
+-- Crear un usuario
+INSERT INTO usuarios (nombre, email) VALUES ('Juan', 'juan@email.com');
+
+-- Buscar un usuario
+SELECT * FROM usuarios WHERE id_usuario = 1;
+
+-- Actualizar un usuario
+UPDATE usuarios SET nombre = 'Juan Carlos' WHERE id_usuario = 1;
+
+-- Borrar un usuario
+DELETE FROM usuarios WHERE id_usuario = 1;
+```
+
+### El Problema de SQL
+
+Escribir SQL directamente tiene problemas:
 
 ```python
+# ❌ SQL directo (peligroso)
+cursor.execute(f"SELECT * FROM usuarios WHERE id = {user_id}")
+# Si user_id = "1 OR 1=1", ¡muestra TODOS los usuarios!
+# Esto se llama "Inyección SQL"
+```
+
+### ¿Qué es un ORM?
+
+**ORM** (Object-Relational Mapping) es un **traductor** entre Python y SQL:
+
+```
+Python                    ORM                    SQL
+────────────────────────────────────────────────────────────
+Usuario(nombre="Juan")  →  Traduce  →  INSERT INTO usuarios...
+db.query(Usuario)       →  Traduce  →  SELECT * FROM usuarios
+usuario.nombre = "X"    →  Traduce  →  UPDATE usuarios SET...
+```
+
+**Ventajas:**
+
+| Sin ORM (SQL directo) | Con ORM (SQLAlchemy) |
+|----------------------|---------------------|
+| Escribes SQL manual | Escribes Python |
+| Propenso a errores | Validación automática |
+| Difícil de cambiar de BD | Cambias de BD en 1 línea |
+| Inyección SQL posible | ¡Protección automática! |
+
+---
+
+## SQLAlchemy: El Traductor
+
+### Conexión a la Base de Datos
+
+```python
+# app/database/connection.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from ..config import settings
 
-# Configuración diferente para SQLite vs MySQL
-if settings.DATABASE_URL.startswith("sqlite"):
-    engine = create_engine(
-        settings.DATABASE_URL,
-        echo=settings.DATABASE_ECHO,
-        connect_args={"check_same_thread": False}
-    )
-else:
-    engine = create_engine(
-        settings.DATABASE_URL,
-        echo=settings.DATABASE_ECHO,
-        pool_pre_ping=True,
-        pool_recycle=3600,
-        pool_size=10,
-        max_overflow=20
-    )
+# El motor es el "cable" que conecta Python con MySQL
+engine = create_engine(
+    "mysql+pymysql://usuario:contraseña@localhost:3306/mi_base",
+    echo=True,           # Muestra las consultas SQL en pantalla
+    pool_pre_ping=True,  # Verifica que la conexión esté viva
+    pool_recycle=3600,   # Renueva la conexión cada hora
+    pool_size=10,        # Mantiene 10 conexiones listas
+    max_overflow=20      # Puede crear 20 más si es necesario
+)
 
+# La fábrica de sesiones (donde se crean las conexiones)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# La base para todos los modelos (como una plantilla)
 Base = declarative_base()
 ```
 
-> **¿Por qué configuración diferente para SQLite y MySQL?**
->
-> **SQLite** está diseñado para aplicaciones embebidas de un solo proceso:
->
-> - `check_same_thread=False`: SQLite por defecto solo permite acceso desde el thread que creó la conexión. FastAPI usa múltiples threads, así que necesitamos desactivar esta restricción.
-> - SQLite no tiene concepto de "pool de conexiones" porque es un archivo local.
-> - Útil para desarrollo y tests, **nunca para producción**.
->
-> **MySQL** es un servidor cliente-servidor que requiere pool de conexiones:
->
-> | Parámetro | Valor | ¿Por qué? |
-> |-----------|-------|-----------|
-> | `pool_pre_ping=True` | Habilitado | MySQL cierra conexiones inactivas por timeout (`wait_timeout`). Sin esto, obtienes errores intermitentes como "MySQL server has gone away" después de períodos de inactividad. |
-> | `pool_recycle=3600` | 1 hora | Fuerza la reconexión cada hora. Previene problemas con firewalls que cierran conexiones TCP idle, y conexiones corruptas por timeouts del servidor. |
-> | `pool_size=10` | 10 conexiones | Conexiones permanentemente abiertas. Suficiente para aplicaciones típicas. Cada conexión consume ~1MB de memoria en el servidor MySQL. |
-> | `max_overflow=20` | 20 extra | Conexiones temporales cuando el pool está lleno. Total máximo = 10 + 20 = 30. Útil para picos de tráfico. |
+### ¿Qué significa cada parte?
 
-> **¿Qué hace cada objeto?**
->
-> | Objeto | Propósito | Ciclo de vida |
-> |--------|----------|---------------|
-> | `engine` | Motor de conexión que gestiona el pool | Global, vive toda la aplicación |
-> | `SessionLocal` | Fábrica de sesiones | Global, no es una sesión en sí |
-> | `Base` | Clase base para todos los modelos | Global, define metadata |
->
-> **¿Por qué `autocommit=False`?**
->
-> ```python
-> # Con autocommit=True (PELIGROSO)
-> usuario = Usuario(nombre="Juan")
-> db.add(usuario)  # Ya está en la BD, no hay rollback posible
->
-> # Con autocommit=False (SEGURO)
-> usuario = Usuario(nombre="Juan")
-> db.add(usuario)  # No está en BD todavía
-> db.rollback()    # Deshacer cambios, como si nada hubiera pasado
-> ```
->
-> **Beneficios de autocommit=False:**
-> - Transacciones atómicas: todo se guarda o nada se guarda
-> - Rollback en caso de error
-> - Control explícito de cuándo persistir cambios
+| Código | ¿Qué hace? | Analogía |
+|--------|------------|----------|
+| `create_engine()` | Crea el cable a MySQL | El cable de la nevera |
+| `echo=True` | Muestra las consultas SQL | Ver lo que cocina el chef |
+| `pool_pre_ping=True` | Verifica que la conexión funcione | Tocar antes de abrir |
+| `pool_size=10` | Mantiene 10 conexiones listas | 10 operadores esperando |
+| `SessionLocal` | Fábrica de conexiones | La oficina del call center |
+| `Base` | La plantilla para modelos | El molde de las cajas |
 
-> **¿Por qué `autoflush=False`?**
->
-> ```python
-> # Con autoflush=True (default)
-> usuario = Usuario(nombre="Juan")
-> db.add(usuario)
-> db.query(Usuario).all()  # Flush automático: envía INSERT antes del SELECT
->                          # Problema: queries innecesarias
->
-> # Con autoflush=False
-> usuario = Usuario(nombre="Juan")
-> db.add(usuario)
-> db.query(Usuario).all()  # No hay flush automático
-> db.commit()              # Recién aquí se envía el INSERT
-> ```
+### SQLite vs MySQL
 
-## Modelos ORM
+**SQLite** es como una nevera portátil (un archivo):
 
-### Estructura de un Modelo
+```python
+# Para desarrollo y pruebas
+engine = create_engine("sqlite:///mi_base.db")
+```
+
+**MySQL** es como una nevera industrial (servidor):
+
+```python
+# Para producción
+engine = create_engine(
+    "mysql+pymysql://usuario:contraseña@servidor:3306/mi_base",
+    pool_size=10,  # MySQL necesita un pool de conexiones
+)
+```
+
+---
+
+## Modelos: Las Cajas de la Nevera
+
+### Crear un Modelo
 
 ```python
 # app/models/usuario.py
-from sqlalchemy import Column, Integer, String, DateTime, Date, Enum
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from ..database.connection import Base
 
 class Usuario(Base):
+    # El nombre de la tabla en MySQL
     __tablename__ = "usuarios"
 
-    # Clave primaria
+    # Las columnas (los campos de la tabla)
     id_usuario = Column(Integer, primary_key=True, index=True)
-
-    # Campos obligatorios
     nombre = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False, unique=True)
     contraseña_hash = Column(String(255), nullable=False)
-
-    # Campos opcionales
     telefono = Column(String(20), nullable=True)
-    fecha_nacimiento = Column(Date, nullable=True)
-
-    # Campos automáticos
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    # Relaciones
+    # Relaciones (las veremos más adelante)
     roles = relationship("Rol", secondary="usuario_rol", back_populates="usuarios")
 ```
 
-**¿Por qué heredar de `Base`?**
+### ¿Qué significa cada cosa?
 
-`Base` es la clase declarativa de SQLAlchemy que:
-1. Registra la clase como mapeador ORM
-2. Proporciona metadata para crear las tablas
-3. Habilita el sistema de relaciones
-
-Sin heredar de `Base`, SQLAlchemy no sabe que es un modelo ORM.
-
-**¿Qué significa cada parámetro de Column?**
-
-| Parámetro | ¿Qué hace? | ¿Por qué usarlo? |
-|-----------|------------|-----------------|
-| `primary_key=True` | Marca como clave primaria | Identificador único, necesario para todo modelo |
-| `index=True` | Crea índice en la columna | Acelera búsquedas por este campo. Útil para campos que se filtran frecuentemente |
-| `nullable=False` | No permite NULL | El campo es obligatorio. La BD rechazará inserts sin este valor |
-| `nullable=True` | Permite NULL | El campo es opcional |
-| `unique=True` | Valor único en la tabla | Para emails, usernames. Garantiza que no haya duplicados |
-| `server_default=func.now()` | Valor por defecto en la BD | La BD asigna el valor, no Python. Útil para timestamps |
-| `onupdate=func.now()` | Actualiza automáticamente | Se ejecuta en cada UPDATE. Mantiene `updated_at` sincronizado |
-
-**¿Por qué `id_usuario` y no solo `id`?**
+#### `__tablename__`
 
 ```python
-# ❌ Ambiguo
+__tablename__ = "usuarios"
+```
+
+Esto dice: "En MySQL, esta clase se llama `usuarios`".
+
+Sin esto, SQLAlchemy usaría el nombre de la clase (`Usuario`) en minúsculas (`usuario`).
+
+#### Columnas
+
+```python
+id_usuario = Column(Integer, primary_key=True, index=True)
+#                 │         │                │
+#                 │         │                └── Crea un índice (búsquedas rápidas)
+#                 │         └── Es la clave primaria (identificador único)
+#                 └── Es un número entero
+```
+
+```python
+nombre = Column(String(100), nullable=False)
+#                │             │
+#                │             └── Es obligatorio (no puede estar vacío)
+#                └── Es texto de máximo 100 caracteres
+```
+
+```python
+email = Column(String(100), nullable=False, unique=True)
+#                                    │
+#                                    └── No puede repetirse (cada email es único)
+```
+
+```python
+telefono = Column(String(20), nullable=True)
+#                             │
+#                             └── Es opcional (puede estar vacío)
+```
+
+```python
+created_at = Column(DateTime, server_default=func.now())
+#                         │
+#                         └── MySQL pone la fecha automáticamente
+```
+
+### ¿Por qué `id_usuario` y no solo `id`?
+
+```python
+# ❌ Confuso
 class Usuario(Base):
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)  # ¿id de qué?
 
 class Equipo(Base):
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)  # ¿id de qué?
 
 # En consultas:
-query.filter(Usuario.id == Equipo.id)  # ¿Qué id es cuál?
+query.filter(Usuario.id == Equipo.id)  # ¿Cuál es cuál?
 ```
 
 ```python
-# ✅ Claro y explícito
+# ✅ Claro
 class Usuario(Base):
-    id_usuario = Column(Integer, primary_key=True)
+    id_usuario = Column(Integer, primary_key=True)  # ID del usuario
 
 class Equipo(Base):
-    id_equipo = Column(Integer, primary_key=True)
+    id_equipo = Column(Integer, primary_key=True)  # ID del equipo
 
 # En consultas:
-query.filter(Usuario.id_usuario == Equipo.id_usuario_entrenador)
+query.filter(Usuario.id_usuario == Equipo.id_usuario_entrenador)  # ¡Claro!
 ```
 
-**Ventajas del prefijo `id_`:**
-- Nombres únicos en toda la aplicación
-- Claridad en JOINs y relaciones
-- Autodocumentación: `id_usuario` es el ID del usuario
+### Tipos de Datos
 
-**¿Por qué `contraseña_hash` y no `contraseña`?**
+| Tipo SQLAlchemy | Tipo en MySQL | Para qué sirve |
+|-----------------|---------------|----------------|
+| `Integer` | INT | Números enteros (IDs, edades) |
+| `String(n)` | VARCHAR(n) | Texto corto (nombres, emails) |
+| `Text` | TEXT | Texto largo (descripciones) |
+| `Boolean` | BOOLEAN | Verdadero/Falso (activo, verificado) |
+| `DateTime` | DATETIME | Fechas y horas (created_at) |
+| `Date` | DATE | Solo fecha (fecha_nacimiento) |
+| `Float` | FLOAT | Decimales (rating: 4.5) |
+| `Enum` | ENUM | Valores fijos (estado: activo, inactivo) |
 
 ```python
-# ❌ Confuso - ¿está hasheada o en texto plano?
-contraseña = Column(String(255))
+from sqlalchemy import Column, Integer, String, DateTime, Date, Boolean, Float, Enum
 
-# ✅ Claro - es un hash bcrypt
-contraseña_hash = Column(String(255))
+class Jugador(Base):
+    __tablename__ = "jugadores"
+
+    id_jugador = Column(Integer, primary_key=True)
+    nombre = Column(String(100), nullable=False)      # Texto hasta 100 caracteres
+    bio = Column(Text)                                  # Texto largo
+    activo = Column(Boolean, default=True)             # Verdadero/Falso
+    fecha_nacimiento = Column(Date)                    # Solo fecha
+    ultimo_login = Column(DateTime, server_default=func.now())  # Fecha y hora
+    rating = Column(Float)                              # Decimal
+    estado = Column(Enum("activo", "inactivo", "lesionado"))  # Valores fijos
 ```
-
-El nombre indica que **nunca** se almacena la contraseña original, solo su hash.
-Esto recuerda a los desarrolladores que deben usar funciones de hash.
-
-### Tipos de Columnas
-
-| Tipo SQLAlchemy | Tipo SQL   | Uso             |
-| --------------- | ---------- | --------------- |
-| `Integer`       | INT        | IDs, contadores |
-| `String(n)`     | VARCHAR(n) | Texto corto     |
-| `Text`          | VARCHAR    | Texto largo     |
-| `Boolean`       | BOOLEAN    | True/False      |
-| `DateTime`      | DATETIME   | Fechas y horas  |
-| `Date`          | DATE       | Solo fechas     |
-| `Float`         | FLOAT      | Decimales       |
-| `Enum`          | ENUM       | Valores fijos   |
-
-> **¿Cuándo usar cada tipo?**
->
-> | Tipo | Usar cuando... | Ejemplo |
-> |------|----------------|---------|
-> | `String(n)` | Texto con longitud máxima conocida | `nombre`, `email` (n=100) |
-> | `Text` | Texto largo sin límite definido | `descripcion`, `biografia` |
-> | `Boolean` | Valores binarios | `activo`, `verificado` |
-> | `DateTime` | Timestamps con hora | `created_at`, `last_login` |
-> | `Date` | Solo fecha sin hora | `fecha_nacimiento`, `fecha_partido` |
-> | `Float` | Decimales aproximados | `rating`, `temperatura` |
-> | `Enum` | Conjunto finito de valores | `estado: ['pendiente', 'activo', 'cancelado']` |
->
-> **¡Cuidado con Float!**
->
-> ```python
-> # ❌ Float tiene problemas de precisión
-> precio = Column(Float)  # 0.1 + 0.2 != 0.3 en Float
->
-> # ✅ Para dinero, usar DECIMAL
-> from sqlalchemy import DECIMAL
-> precio = Column(DECIMAL(10, 2))  # Exacto para dinero
-> ```
 
 ### Parámetros de Columna
 
 ```python
 Column(
-    Integer,
-    primary_key=True,       # Clave primaria
-    index=True,              # Crea índice
-    nullable=False,          # No permite NULL
-    unique=True,             # Valor único
-    default=True,            # Valor por defecto en Python
-    server_default="now()",  # Valor por defecto en SQL
-    ForeignKey("tabla.id")   # Clave foránea
+    Integer,              # El tipo de dato
+    primary_key=True,     # Es la clave primaria (identificador único)
+    index=True,           # Crea un índice para búsquedas rápidas
+    nullable=False,       # Es obligatorio (no puede ser NULL)
+    nullable=True,        # Es opcional (puede ser NULL)
+    unique=True,           # No puede repetirse
+    default=True,          # Valor por defecto en Python
+    server_default="now()", # Valor por defecto en MySQL
+    ForeignKey("tabla.id") # Es clave foránea (relación con otra tabla)
 )
 ```
 
-> **¿Diferencia entre `default` y `server_default`?**
->
-> ```python
-> # default - valor asignado por Python
-> created_at = Column(DateTime, default=datetime.utcnow)
-> # Se asigna cuando creas el objeto en Python:
-> usuario = Usuario()  # created_at ya tiene valor
->
-> # server_default - valor asignado por la BD
-> created_at = Column(DateTime, server_default=func.now())
-> # Se asigna cuando se hace INSERT en la BD:
-> usuario = Usuario()  # created_at es None
-> db.add(usuario)
-> db.commit()  # Ahora created_at tiene valor
-> ```
->
-> **¿Cuándo usar cada uno?**
->
-> | Situación | Usar |
-> |-----------|------|
-> | Necesitas el valor antes de commit (ej: validaciones) | `default` |
-> | Valor calculado por BD (ej: `now()`, `uuid()`) | `server_default` |
-> | Múltiples clientes insertando (bulk insert desde SQL) | `server_default` |
-> | Tests sin BD (valor disponible inmediatamente) | `default` |
+#### ¿Diferencia entre `default` y `server_default`?
+
+```python
+# default - Python pone el valor
+created_at = Column(DateTime, default=datetime.utcnow)
+# Python ejecuta datetime.utcnow() antes de guardar
+usuario = Usuario()  # created_at ya tiene valor aquí
+
+# server_default - MySQL pone el valor
+created_at = Column(DateTime, server_default=func.now())
+# MySQL pone la fecha al hacer INSERT
+usuario = Usuario()  # created_at es None
+db.add(usuario)
+db.commit()  # Ahora created_at tiene valor
+```
+
+---
 
 ## Relaciones entre Tablas
 
 ### Relación Uno a Muchos (1:N)
+
+Imagina una **liga** tiene muchos **equipos**:
+
+```
+Liga: "Primera División"
+├── Equipo: Real Madrid
+├── Equipo: Barcelona
+├── Equipo: Atlético Madrid
+└── Equipo: Valencia
+```
+
+**En la base de datos:**
+
+```sql
+-- La liga es UNA
+CREATE TABLE ligas (
+    id_liga INT PRIMARY KEY,
+    nombre VARCHAR(100)
+);
+
+-- Los equipos son MUCHOS, y cada uno tiene una liga
+CREATE TABLE equipos (
+    id_equipo INT PRIMARY KEY,
+    nombre VARCHAR(100),
+    id_liga INT,                    -- Esta es la clave foránea
+    FOREIGN KEY (id_liga) REFERENCES ligas(id_liga)
+);
+```
+
+**En SQLAlchemy:**
 
 ```python
 class Liga(Base):
@@ -280,643 +347,494 @@ class Equipo(Base):
     __tablename__ = "equipos"
     id_equipo = Column(Integer, primary_key=True)
     nombre = Column(String(100))
-    id_liga = Column(Integer, ForeignKey("ligas.id_liga"))
 
-    # Un equipo pertenece a una liga
+    # Muchos equipos pertenecen a una liga
+    id_liga = Column(Integer, ForeignKey("ligas.id_liga"))
     liga = relationship("Liga", back_populates="equipos")
 ```
 
-> **¿Cómo funciona esta relación?**
->
-> **En la base de datos:**
-> ```sql
-> CREATE TABLE ligas (id_liga INT PRIMARY KEY, nombre VARCHAR(100));
-> CREATE TABLE equipos (
->     id_equipo INT PRIMARY KEY,
->     nombre VARCHAR(100),
->     id_liga INT REFERENCES ligas(id_liga)  -- Clave foránea
-> );
-> ```
->
-> **En Python:**
-> ```python
-> # Crear liga con equipos
-> liga = Liga(nombre="Primera División")
-> liga.equipos = [
->     Equipo(nombre="Equipo A"),
->     Equipo(nombre="Equipo B")
-> ]
-> db.add(liga)
-> db.commit()
->
-> # Acceder a equipos desde liga
-> liga = db.query(Liga).first()
-> for equipo in liga.equipos:  # SQLAlchemy hace JOIN automático
->     print(equipo.nombre)
->
-> # Acceder a liga desde equipo
-> equipo = db.query(Equipo).first()
-> print(equipo.liga.nombre)  # JOIN automático
-> ```
+**¿Cómo se usa?**
 
-> **¿Qué es `back_populates`?**
->
-> ```python
-> # Sin back_populates (unidireccional)
-> class Liga(Base):
->     equipos = relationship("Equipo")  # Liga → Equipo
->
-> class Equipo(Base):
->     # No hay relación inversa
->     pass
->
-> # Equipo NO puede acceder a liga.equipos
-> equipo.liga  # AttributeError
->
-> # Con back_populates (bidireccional)
-> class Liga(Base):
->     equipos = relationship("Equipo", back_populates="liga")  # Liga → Equipo
->
-> class Equipo(Base):
->     liga = relationship("Liga", back_populates="equipos")  # Equipo → Liga
->
-> # Ambos lados pueden acceder
-> liga.equipos  # Lista de equipos
-> equipo.liga   # Liga a la que pertenece
-> ```
+```python
+# Crear una liga con equipos
+liga = Liga(nombre="Primera División")
+liga.equipos = [
+    Equipo(nombre="Real Madrid"),
+    Equipo(nombre="Barcelona"),
+]
+db.add(liga)
+db.commit()
 
-> **¿Por qué la FK está en el lado "muchos"?**
->
-> ```
-> Liga (1) ──────< Equipo (N)
->                 └── id_liga (FK)
-> ```
->
-> - Un equipo pertenece a **una** liga → FK en equipo
-> - Una liga tiene **muchos** equipos → No FK en liga
->
-> Si pusieras FK en Liga:
-> ```python
-> # ❌ Mal diseño
-> class Liga(Base):
->     id_equipo_1 = Column(Integer, ForeignKey("equipos.id_equipo"))
->     id_equipo_2 = Column(Integer, ForeignKey("equipos.id_equipo"))
->     # ¿Y si hay 20 equipos? ¿Y si se añaden más?
-> ```
->
-> La FK siempre va en el lado **muchos** de la relación.
+# Obtener los equipos de una liga
+liga = db.query(Liga).first()
+for equipo in liga.equipos:  # SQLAlchemy hace el JOIN automáticamente
+    print(equipo.nombre)
+
+# Obtener la liga de un equipo
+equipo = db.query(Equipo).first()
+print(equipo.liga.nombre)  # ¡También funciona!
+```
+
+### ¿Qué es `relationship`?
+
+`relationship` es la **magia** de SQLAlchemy. Te permite navegar entre tablas como si fueran objetos:
+
+```python
+# Sin relationship (❌)
+equipo = db.query(Equipo).first()
+liga = db.query(Liga).filter(Liga.id_liga == equipo.id_liga).first()  # Manual
+
+# Con relationship (✅)
+equipo = db.query(Equipo).first()
+liga = equipo.liga  # ¡Automático!
+```
+
+### ¿Qué es `back_populates`?
+
+`back_populates` crea una **conexión bidireccional**:
+
+```python
+# Sin back_populates (unidireccional)
+class Liga(Base):
+    equipos = relationship("Equipo")  # Liga → Equipo funciona
+
+class Equipo(Base):
+    pass  # Equipo → Liga NO funciona
+
+liga.equipos  # ✅ Funciona
+equipo.liga   # ❌ Error: no existe
+
+# Con back_populates (bidireccional)
+class Liga(Base):
+    equipos = relationship("Equipo", back_populates="liga")
+
+class Equipo(Base):
+    liga = relationship("Liga", back_populates="equipos")
+
+liga.equipos  # ✅ Funciona
+equipo.liga   # ✅ También funciona
+```
 
 ### Relación Muchos a Muchos (N:N)
 
+Imagina que un **usuario** puede tener muchos **roles**, y un **rol** puede tener muchos **usuarios**:
+
+```
+Usuarios                  Roles
+├── Juan (Admin, Editor)  ├── Admin
+├── María (Editor)        ├── Editor
+└── Pedro (Viewer)        └── Viewer
+```
+
+**¿Cómo se representa en la base de datos?**
+
+Necesitas una **tabla intermedia**:
+
+```sql
+CREATE TABLE usuarios (
+    id_usuario INT PRIMARY KEY,
+    nombre VARCHAR(100)
+);
+
+CREATE TABLE roles (
+    id_rol INT PRIMARY KEY,
+    nombre VARCHAR(50)
+);
+
+-- Tabla intermedia (la conexión)
+CREATE TABLE usuario_rol (
+    id_usuario_rol INT PRIMARY KEY,
+    id_usuario INT,
+    id_rol INT,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
+    FOREIGN KEY (id_rol) REFERENCES roles(id_rol)
+);
+```
+
+**En SQLAlchemy:**
+
 ```python
-# Tabla intermedia
-class UsuarioRol(Base):
-    __tablename__ = "usuario_rol"
-    id_usuario_rol = Column(Integer, primary_key=True)
-    id_usuario = Column(Integer, ForeignKey("usuarios.id_usuario"))
-    id_rol = Column(Integer, ForeignKey("roles.id_rol"))
+# Tabla intermedia (no necesita clase, solo la tabla)
+usuario_rol = Table(
+    'usuario_rol',
+    Base.metadata,
+    Column('id_usuario_rol', Integer, primary_key=True),
+    Column('id_usuario', Integer, ForeignKey('usuarios.id_usuario')),
+    Column('id_rol', Integer, ForeignKey('roles.id_rol'))
+)
 
 class Usuario(Base):
     __tablename__ = "usuarios"
     id_usuario = Column(Integer, primary_key=True)
+    nombre = Column(String(100))
 
-    # Relación N:N
-    roles = relationship("Rol", secondary="usuario_rol", back_populates="usuarios")
+    # Un usuario tiene muchos roles (a través de la tabla intermedia)
+    roles = relationship("Rol", secondary=usuario_rol, back_populates="usuarios")
 
 class Rol(Base):
     __tablename__ = "roles"
     id_rol = Column(Integer, primary_key=True)
+    nombre = Column(String(50))
 
-    usuarios = relationship("Usuario", secondary="usuario_rol", back_populates="roles")
+    # Un rol tiene muchos usuarios
+    usuarios = relationship("Usuario", secondary=usuario_rol, back_populates="roles")
 ```
 
-> **¿Por qué se necesita una tabla intermedia?**
->
-> **El problema:**
->
-> Un usuario puede tener muchos roles. Un rol puede tener muchos usuarios.
->
-> ```
-> Usuario ── tiene ──> Rol 1, Rol 2, Rol 3
-> Rol 1 ── pertenece a ──> Usuario A, Usuario B, Usuario C
-> ```
->
-> **No se puede representar con una sola FK:**
->
-> ```sql
-> -- ❌ Imposible: un campo no puede tener múltiples valores
-> CREATE TABLE usuarios (
->     id INT PRIMARY KEY,
->     roles VARCHAR(???)  -- "admin,editor,viewer"? ¡Mal diseño!
-> );
-> ```
->
-> **Solución: Tabla intermedia**
->
-> ```sql
-> -- ✅ Correcto: tabla de asociación
-> CREATE TABLE usuario_rol (
->     id_usuario_rol INT PRIMARY KEY,
->     id_usuario INT REFERENCES usuarios(id_usuario),
->     id_rol INT REFERENCES roles(id_rol),
->     UNIQUE(id_usuario, id_rol)  -- Evita duplicados
-> );
-> ```
->
-> Esta tabla asocia usuarios con roles de forma limpia y normalizada.
-
-> **¿Qué hace `secondary`?**
->
-> ```python
-> roles = relationship("Rol", secondary="usuario_rol", back_populates="usuarios")
-> #                                  ↑
-> #                          Nombre de la tabla intermedia
-> ```
->
-> SQLAlchemy:
-> 1. Detecta que es una relación N:N
-> 2. Busca la tabla `usuario_rol`
-> 3. Usa las FK para hacer JOINs automáticamente
->
-> ```python
-> usuario = db.query(Usuario).first()
-> usuario.roles  # SQLAlchemy ejecuta:
-> # SELECT roles.* FROM roles
-> # JOIN usuario_rol ON roles.id_rol = usuario_rol.id_rol
-> # WHERE usuario_rol.id_usuario = ?
-> ```
-
-### Lazy Loading
+**¿Cómo se usa?**
 
 ```python
-# Cargar inmediatamente
-roles = relationship("Rol", secondary="usuario_rol", lazy="select")
+# Crear roles
+admin = Rol(nombre="admin")
+editor = Rol(nombre="editor")
 
-# Cargar con JOIN (una consulta)
-roles = relationship("Rol", secondary="usuario_rol", lazy="joined")
+# Crear usuario con roles
+usuario = Usuario(nombre="Juan")
+usuario.roles = [admin, editor]  # Asignar múltiples roles
 
-# Cargar con subconsulta
-roles = relationship("Rol", secondary="usuario_rol", lazy="subquery")
-```
-
-> **¿Qué es Lazy Loading y por qué importa?**
->
-> **El problema N+1:**
->
-> ```python
-> # lazy="select" (default) - Lazy Loading
-> usuarios = db.query(Usuario).all()  # 1 query
->
-> for usuario in usuarios:
->     print(usuario.roles)  # N queries adicionales!
->
-> # Total: 1 + N queries
-> # Si hay 100 usuarios = 101 queries
-> ```
->
-> **Con Eager Loading:**
->
-> ```python
-> # lazy="joined" - Eager Loading
-> usuarios = db.query(Usuario).options(joinedload(Usuario.roles)).all()
->
-> for usuario in usuarios:
->     print(usuario.roles)  # Ya están cargados
->
-> # Total: 1 query con JOIN
-> ```
->
-> **Comparación de estrategias:**
->
-> | Estrategia | Queries | Cuándo usar |
-> |------------|---------|-------------|
-> | `lazy="select"` | 1 + N | Cuando no siempre necesitas la relación |
-> | `lazy="joined"` | 1 | Cuando siempre necesitas la relación |
-> | `lazy="subquery"` | 2 | Cuando necesitas la relación pero con filtrado |
->
-> **Recomendación:**
->
-> ```python
-> # En el modelo: lazy loading por defecto
-> roles = relationship("Rol", secondary="usuario_rol")
->
-> # En la query: eager loading cuando necesites
-> db.query(Usuario).options(joinedload(Usuario.roles)).all()
-> ```
->
-> Esto da flexibilidad: lazy por defecto, eager cuando lo necesites.
-
-## Sesiones de Base de Datos
-
-### Patrón por Petición
-
-```python
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-```
-
-> **¿Por qué una sesión por petición?**
->
-> **Problema con sesión global:**
->
-> ```python
-> # ❌ PELIGROSO - Sesión global
-> db = SessionLocal()
->
-> @router.post("/usuarios/")
-> def crear(datos: UsuarioCreate):
->     usuario = Usuario(...)
->     db.add(usuario)
->     # Si hay error aquí, db tiene estado inconsistente
->     db.commit()
->     return usuario
->
-> # Problemas:
-> # 1. Si hay error, la sesión queda en estado corrupto
-> # 2. No hay aislamiento entre requests
-> # 3. Problemas de concurrencia
-> ```
->
-> **Solución: Sesión por petición:**
->
-> ```python
-> # ✅ CORRECTO - Sesión por petición
-> def get_db():
->     db = SessionLocal()  # Nueva sesión para cada request
->     try:
->         yield db
->     finally:
->         db.close()  # Siempre se cierra, incluso con error
->
-> @router.post("/usuarios/")
-> def crear(datos: UsuarioCreate, db: Session = Depends(get_db)):
->     usuario = Usuario(...)
->     db.add(usuario)
->     db.commit()
->     return usuario
->     # db.close() se ejecuta automáticamente
-> ```
->
-> **Beneficios:**
->
-> 1. **Aislamiento**: Cada request tiene su propia sesión, sin interferencia.
-> 2. **Limpieza automática**: `finally` garantiza que `db.close()` siempre se ejecuta.
-> 3. **Rollback automático**: Si no hay commit explícito, los cambios se descartan al cerrar.
-
-### Operaciones CRUD
-
-```python
-# CREATE
-usuario = Usuario(nombre="Juan", email="juan@email.com")
 db.add(usuario)
 db.commit()
-db.refresh(usuario)  # Obtener ID generado
 
-# READ
-usuario = db.query(Usuario).filter(Usuario.id_usuario == 1).first()
-usuarios = db.query(Usuario).filter(Usuario.nombre.like("%Juan%")).all()
+# Obtener los roles de un usuario
+usuario = db.query(Usuario).first()
+for rol in usuario.roles:
+    print(rol.nombre)  # "admin", "editor"
 
-# UPDATE
-usuario.nombre = "Juan Carlos"
-db.commit()
-
-# DELETE
-db.delete(usuario)
-db.commit()
+# Obtener los usuarios de un rol
+rol = db.query(Rol).filter(Rol.nombre == "admin").first()
+for usuario in rol.usuarios:
+    print(usuario.nombre)
 ```
 
-> **¿Por qué `db.refresh()` después de INSERT?**
->
-> ```python
-> usuario = Usuario(nombre="Juan", email="juan@email.com")
-> print(usuario.id_usuario)  # None - todavía no hay ID
->
-> db.add(usuario)
-> db.commit()  # INSERT ejecutado
->
-> print(usuario.id_usuario)  # ¿None o ID?
-> # Sin refresh: depende de la BD y driver
-> # Con refresh: garantizado que tiene el ID
-> db.refresh(usuario)
-> print(usuario.id_usuario)  # ID generado por la BD
-> ```
->
-> `refresh()` hace un SELECT para obtener los valores generados por la BD:
-> - `id_usuario` (autoincrement)
-> - `created_at` (server_default)
-> - Cualquier campo calculado por triggers
+---
 
-> **¿Por qué no hay commit en READ?**
->
-> ```python
-> # READ - solo consulta
-> usuario = db.query(Usuario).filter(Usuario.id_usuario == 1).first()
-> # No modifica datos → no necesita commit
->
-> # CREATE - modifica datos
-> db.add(usuario)
-> db.commit()  # Necesario para persistir
->
-> # UPDATE - modifica datos
-> usuario.nombre = "Nuevo"
-> db.commit()  # Necesario para persistir
-> ```
->
-> `commit()` escribe los cambios en la BD. Las consultas SELECT no modifican nada.
+## El Problema N+1 y Lazy Loading
 
-> **¿Qué pasa si no hago commit?**
->
-> ```python
-> usuario = Usuario(nombre="Juan")
-> db.add(usuario)
-> # Sin commit
->
-> # En la misma sesión:
-> db.query(Usuario).all()  # Ve a Juan (cached)
->
-> # En otra sesión/conexión:
-> db2 = SessionLocal()
-> db2.query(Usuario).all()  # NO ve a Juan (no commit)
-> ```
->
-> Los cambios sin commit solo son visibles en la misma sesión.
+### ¿Qué es Lazy Loading?
 
-### Consultas con JOIN
+Lazy Loading significa: "No cargues los datos hasta que los necesites".
+
+```python
+# Lazy Loading (por defecto)
+usuario = db.query(Usuario).first()  # 1 query
+print(usuario.roles)  # 1 query adicional (se carga ahora)
+```
+
+### El Problema N+1
+
+```python
+# Obtener 10 usuarios
+usuarios = db.query(Usuario).limit(10).all()  # 1 query
+
+# Para cada usuario, obtener sus roles
+for usuario in usuarios:
+    print(usuario.roles)  # 10 queries adicionales!
+
+# Total: 1 + 10 = 11 queries
+```
+
+**¿Por qué es malo?**
+
+Imagina que tienes 1,000 usuarios. ¡Haces 1,001 queries!
+
+### Solución: Eager Loading
+
+Eager Loading significa: "Carga todo de una vez".
 
 ```python
 from sqlalchemy.orm import joinedload
 
-# Cargar usuario con sus roles
+# Eager Loading
 usuarios = db.query(Usuario).options(joinedload(Usuario.roles)).all()
+# 1 query con JOIN
 
-# Filtrar por relación
-usuarios = db.query(Usuario).join(Usuario.roles).filter(Rol.nombre == "admin").all()
+for usuario in usuarios:
+    print(usuario.roles)  # Ya está cargado, 0 queries adicionales
+
+# Total: 1 query
 ```
 
-> **¿Cuándo usar `joinedload` vs `join`?**
->
-> **`joinedload` - Para cargar relaciones:**
->
-> ```python
-> # joinedload: CARGA la relación automáticamente
-> usuarios = db.query(Usuario).options(joinedload(Usuario.roles)).all()
->
-> for usuario in usuarios:
->     print(usuario.roles)  # Ya está cargado, no hay query adicional
->
-> # SQL generado:
-> # SELECT usuarios.*, roles.* FROM usuarios
-> # LEFT OUTER JOIN usuario_rol ON ...
-> # LEFT OUTER JOIN roles ON ...
-> ```
->
-> **`join` - Para filtrar:**
->
-> ```python
-> # join: FILTRA por relación, pero no la carga
-> usuarios = db.query(Usuario).join(Usuario.roles).filter(Rol.nombre == "admin").all()
->
-> for usuario in usuarios:
->     print(usuario.roles)  # Query adicional por cada usuario (N+1)!
->
-> # SQL generado:
-> # SELECT usuarios.* FROM usuarios
-> # JOIN usuario_rol ON ...
-> # JOIN roles ON ...
-> # WHERE roles.nombre = 'admin'
-> ```
->
-> **Combinando ambos:**
->
-> ```python
-> # Filtrar Y cargar
-> usuarios = db.query(Usuario)\
->     .join(Usuario.roles)\
->     .filter(Rol.nombre == "admin")\
->     .options(joinedload(Usuario.roles))\
->     .all()
-> ```
+**Comparación:**
 
-### Agregaciones
+| Método | Queries | Cuándo usar |
+|--------|---------|-------------|
+| Lazy Loading | 1 + N | Cuando NO siempre necesitas la relación |
+| Eager Loading | 1 | Cuando SIEMPRE necesitas la relación |
+
+---
+
+## Sesiones de Base de Datos
+
+### ¿Qué es una Sesión?
+
+Una **sesión** es como una **conversación temporal** con la base de datos:
 
 ```python
-from sqlalchemy import func
+# Crear una sesión
+db = SessionLocal()
 
-# Contar
-total = db.query(func.count(Usuario.id_usuario)).scalar()
+# Hacer cosas
+usuario = Usuario(nombre="Juan")
+db.add(usuario)      # Agregar a la sesión (todavía no guardado)
+db.commit()          # ¡Ahora sí se guarda!
 
-# Promedio
-promedio = db.query(func.avg(Jugador.dorsal)).scalar()
-
-# Máximo
-max_dorsal = db.query(func.max(Jugador.dorsal)).scalar()
+# Cerrar la sesión
+db.close()
 ```
 
-> **¿Por qué `scalar()` y no `all()` o `first()`?**
->
-> ```python
-> # Agregación devuelve un solo valor
-> result = db.query(func.count(Usuario.id_usuario))
-> # SQL: SELECT COUNT(usuarios.id_usuario) FROM usuarios
->
-> # all() devuelve lista
-> result.all()  # [5] - lista de un elemento
->
-> # first() devuelve tupla
-> result.first()  # (5,) - tupla
->
-> # scalar() devuelve el valor directamente
-> result.scalar()  # 5 - el número
-> ```
->
-> **Regla:**
-> - `scalar()` para agregaciones que devuelven un valor
-> - `first()` para obtener un registro
-> - `all()` para obtener múltiples registros
+### El Patrón por Petición
 
-## Esquema de Base de Datos
+En FastAPI, cada petición HTTP tiene su propia sesión:
 
-```
-┌─────────────┐       ┌─────────────┐       ┌─────────────┐
-│  usuarios   │       │ usuario_rol │       │   roles     │
-├─────────────┤       ├─────────────┤       ├─────────────┤
-│ id_usuario  │───┐   │ id_usuario  │   ┌───│ id_rol      │
-│ nombre      │   └───│ id_rol      │───┘   │ nombre      │
-│ email       │       │ (FK)        │       │ descripcion │
-└─────────────┘       └─────────────┘       └─────────────┘
-       │
-       │ 1:N
-       ▼
-┌─────────────┐       ┌─────────────┐       ┌─────────────┐
-│  jugadores  │       │  equipos    │───────│   ligas     │
-├─────────────┤       ├─────────────┤       ├─────────────┤
-│ id_jugador  │       │ id_equipo   │       │ id_liga     │
-│ id_usuario  │       │ nombre      │       │ nombre      │
-│ id_equipo   │       │ id_liga     │       └─────────────┘
-└─────────────┘       └─────────────┘
+```python
+# app/api/dependencies.py
+def get_db():
+    db = SessionLocal()  # Crear sesión nueva
+    try:
+        yield db          # Dar la sesión al endpoint
+    finally:
+        db.close()        # Siempre cerrar, incluso si hay error
 ```
 
-> **¿Por qué este diseño específico?**
->
-> **Entidades principales:**
->
-> | Entidad | Propósito | Relaciones |
-> |---------|-----------|------------|
-> | `usuarios` | Personas del sistema | N:N con roles, 1:N con jugadores |
-> | `roles` | Permisos | N:N con usuarios |
-> | `ligas` | Competiciones | 1:N con equipos |
-> | `equipos` | Equipos de fútbol | N:1 con ligas, 1:N con jugadores |
-> | `jugadores` | Jugadores de equipos | N:1 con usuarios y equipos |
->
-> **¿Por qué separar `usuarios` y `jugadores`?**
->
-> ```python
-> # ❌ Todo en usuarios
-> class Usuario(Base):
->     nombre = Column(String)
->     dorsal = Column(Integer)  # ¿Y si no es jugador?
->     posicion = Column(String)  # ¿Y si es árbitro?
->
-> # ✅ Separado
-> class Usuario(Base):
->     # Datos comunes a todos
->     nombre = Column(String)
->     email = Column(String)
->
-> class Jugador(Base):
->     # Datos específicos de jugador
->     id_usuario = Column(Integer, ForeignKey("usuarios.id_usuario"))
->     dorsal = Column(Integer)
->     posicion = Column(String)
-> ```
->
-> **Ventajas:**
-> - Un usuario puede no ser jugador (árbitro, administrador)
-> - Un usuario puede ser jugador en múltiples equipos
-> - Datos específicos bien organizados
+```python
+# En el router
+@router.post("/usuarios/")
+def crear(datos: UsuarioCreate, db: Session = Depends(get_db)):
+    # db ya está creado y se cerrará automáticamente
+    return crear_usuario(db, datos)
+```
+
+### ¿Por qué `autocommit=False`?
+
+```python
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+```
+
+**Con `autocommit=True` (❌):**
+
+```python
+usuario = Usuario(nombre="Juan")
+db.add(usuario)  # ¡Ya está guardado!
+# No hay vuelta atrás
+```
+
+**Con `autocommit=False` (✅):**
+
+```python
+usuario = Usuario(nombre="Juan")
+db.add(usuario)  # Solo en memoria, no guardado
+db.commit()      # ¡Ahora sí se guarda!
+# Si hay error antes de commit, nada se guarda
+```
+
+### Operaciones CRUD
+
+#### CREATE (Crear)
+
+```python
+# Crear un usuario
+usuario = Usuario(
+    nombre="Juan",
+    email="juan@email.com",
+    contraseña_hash=hash_password("mi_contraseña")
+)
+
+# Agregar a la sesión
+db.add(usuario)     # En memoria, no guardado todavía
+
+# Guardar en la base de datos
+db.commit()         # ¡Ahora sí está guardado!
+
+# Refrescar para obtener valores generados (como el ID)
+db.refresh(usuario)
+print(usuario.id_usuario)  # Ahora tiene el ID
+```
+
+#### READ (Leer)
+
+```python
+# Obtener todos
+usuarios = db.query(Usuario).all()
+
+# Obtener uno por ID
+usuario = db.query(Usuario).filter(Usuario.id_usuario == 1).first()
+
+# Obtener uno por email
+usuario = db.query(Usuario).filter(Usuario.email == "juan@email.com").first()
+
+# Obtener varios con filtro
+usuarios = db.query(Usuario).filter(Usuario.nombre.like("%Juan%")).all()
+
+# Obtener con ordenamiento
+usuarios = db.query(Usuario).order_by(Usuario.nombre).all()
+
+# Obtener con paginación
+usuarios = db.query(Usuario).offset(0).limit(10).all()  # Los primeros 10
+usuarios = db.query(Usuario).offset(10).limit(10).all() # Del 11 al 20
+```
+
+#### UPDATE (Actualizar)
+
+```python
+# Obtener el usuario
+usuario = db.query(Usuario).filter(Usuario.id_usuario == 1).first()
+
+# Modificar
+usuario.nombre = "Juan Carlos"
+usuario.telefono = "+34123456789"
+
+# Guardar
+db.commit()
+```
+
+#### DELETE (Eliminar)
+
+```python
+# Obtener el usuario
+usuario = db.query(Usuario).filter(Usuario.id_usuario == 1).first()
+
+# Eliminar
+db.delete(usuario)
+db.commit()
+```
+
+### ¿Qué pasa si hay relaciones?
+
+```python
+# Si intentas eliminar un usuario que tiene roles...
+usuario = db.query(Usuario).first()
+db.delete(usuario)
+db.commit()  # ERROR: foreign key constraint
+```
+
+**Solución 1: CASCADE (eliminar en cascada)**
+
+```python
+class Usuario(Base):
+    roles = relationship("Rol", secondary="usuario_rol", cascade="delete")
+```
+
+**Solución 2: Eliminar relaciones primero**
+
+```python
+# Eliminar los roles del usuario
+db.query(UsuarioRol).filter(UsuarioRol.id_usuario == usuario.id_usuario).delete()
+# Eliminar el usuario
+db.delete(usuario)
+db.commit()
+```
+
+---
 
 ## Migraciones con Alembic
 
-### Configuración
+### ¿Qué es una Migración?
+
+Imagina que tienes una tabla `usuarios`:
+
+```
+usuarios
+├── id_usuario
+├── nombre
+└── email
+```
+
+Ahora quieres agregar un campo `telefono`. ¿Cómo lo haces sin perder los datos?
+
+**Una migración** es como una **receta para cambiar la base de datos**:
+
+```python
+# migrations/001_add_telefono.py
+def upgrade():
+    op.add_column('usuarios', Column('telefono', String(20)))
+
+def downgrade():
+    op.drop_column('usuarios', 'telefono')
+```
+
+### Configurar Alembic
 
 ```bash
+# Instalar
+pip install alembic
+
+# Inicializar
 alembic init alembic
 ```
 
-### `alembic/env.py`
+### Configurar `alembic/env.py`
 
 ```python
 from app.database.connection import Base
 from app.config import settings
 
+# Configurar la URL de la base de datos
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
+# Decirle a Alembic dónde están los modelos
 target_metadata = Base.metadata
 ```
 
-> **¿Por qué usar Alembic?**
->
-> **Sin migraciones:**
->
-> ```python
-> # Desarrollo inicial
-> class Usuario(Base):
->     nombre = Column(String(50))
->
-> # Necesitas añadir email...
-> # ¿Cómo lo haces en producción sin perder datos?
-> # ¿Cómo sincronizas con tu equipo?
-> ```
->
-> **Con migraciones:**
->
-> ```bash
-> # 1. Modificas el modelo
-> class Usuario(Base):
->     nombre = Column(String(50))
->     email = Column(String(100))  # Nuevo campo
->
-> # 2. Generas migración
-> alembic revision --autogenerate -m "añadir email"
-> # Genera: versions/abc123_añadir_email.py
->
-> # 3. Aplicas en desarrollo
-> alembic upgrade head
->
-> # 4. En producción
-> alembic upgrade head  # Misma migración
-> ```
->
-> **Ventajas:**
->
-> 1. **Versionado**: Cada cambio en la BD está registrado y tiene un ID.
-> 2. **Reproducible**: Cualquiera puede ejecutar las mismas migraciones.
-> 3. **Rollback**: Puedes deshacer cambios con `downgrade`.
-> 4. **Colaboración**: Los cambios viajan con el código en Git.
-
-### Comandos
+### Comandos Útiles
 
 ```bash
-# Crear migración
-alembic revision --autogenerate -m "Descripción del cambio"
+# Crear una migración automáticamente (detecta cambios en modelos)
+alembic revision --autogenerate -m "Añadir campo telefono a usuarios"
 
-# Aplicar migraciones
+# Aplicar todas las migraciones pendientes
 alembic upgrade head
 
-# Revertir
+# Revertir la última migración
 alembic downgrade -1
 
-# Ver historial
+# Ver el historial de migraciones
 alembic history
 ```
 
-> **¿Qué hace cada comando?**
->
-> | Comando | ¿Qué hace? |
-> |---------|------------|
-> | `revision --autogenerate -m "msg"` | Compara modelos con BD actual y genera script de migración |
-> | `upgrade head` | Aplica todas las migraciones pendientes |
-> | `downgrade -1` | Revierte la última migración |
-> | `history` | Muestra todas las migraciones |
->
-> **Flujo típico:**
->
-> ```bash
-> # 1. Modificas un modelo
-> # Añades campo telefono a Usuario
->
-> # 2. Generas migración
-> alembic revision --autogenerate -m "añadir telefono a usuarios"
->
-> # 3. Revisas el archivo generado
-> # alembic/versions/xyz123_añadir_telefono.py
->
-> # 4. Aplicas
-> alembic upgrade head
->
-> # Si hay error, reviertes
-> alembic downgrade -1
-> ```
+### Flujo de Trabajo
 
-> **¿Por qué `--autogenerate` puede ser peligroso?**
->
-> Alembic detecta cambios automáticamente, pero **no es perfecto**:
->
-> ```python
-> # Si borras un modelo por accidente...
-> # class Usuario(Base):  # Comentado por error
-> #     ...
+```
+1. Modificas un modelo (añades campo telefono)
+   ↓
+2. Generas migración: alembic revision --autogenerate -m "añadir telefono"
+   ↓
+3. Revisas el archivo generado
+   ↓
+4. Aplicas: alembic upgrade head
+   ↓
+5. La base de datos tiene el nuevo campo
+```
+
+### ⚠️ Cuidado con Autogenerate
+
+Alembic detecta cambios automáticamente, pero **no es perfecto**:
+
+```python
+# Si comentas un modelo por error...
+# class Usuario(Base):  # ¡Ups!
+#     ...
 
 # Alembic detecta que "no existe" y genera:
-# downgrade(): DROP TABLE usuarios;  # ¡PELIGROSO!
-> ```
->
-> **Recomendación:**
->
-> 1. Siempre revisa el archivo generado antes de aplicar
-> 2. Nunca ejecutes `upgrade head` sin revisar en producción
-> 3. Haz backup antes de migraciones importantes
-> 4. Prueba las migraciones en desarrollo primero
+# def downgrade(): DROP TABLE usuarios;  # ¡PELIGROSO!
+```
+
+**Siempre revisa el archivo generado antes de aplicar.**
+
+---
+
+## Resumen
+
+Aprendiste:
+
+1. **Base de datos** = Una nevera organizada con cajas (tablas)
+2. **SQL** = El idioma que habla la base de datos
+3. **ORM** = Un traductor de Python a SQL
+4. **Modelos** = Las cajas que organizan los datos
+5. **Relaciones** = Conexiones entre cajas
+   - Uno a Muchos: Una liga tiene muchos equipos
+   - Muchos a Muchos: Un usuario tiene muchos roles
+6. **Sesiones** = Conversaciones temporales con la base de datos
+7. **Migraciones** = Recetas para cambiar la base de datos
+
+**¿Listo para el siguiente paso?**
+
+Ve a **04-schemas.md** para aprender cómo validar los datos que entran y salen.

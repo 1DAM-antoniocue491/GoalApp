@@ -1,129 +1,225 @@
-# Arquitectura del Proyecto
+# Arquitectura del Proyecto (Para Principiantes)
 
-## Arquitectura en Capas
+## ¿Qué es la Arquitectura?
 
-El backend sigue una arquitectura en capas donde cada capa tiene una responsabilidad específica:
+Imagina que vas a construir una casa. No empiezas poniendo ladrillos al azar. Primero necesitas un **plano** que diga:
+
+- Dónde va la cocina
+- Dónde van los cuartos
+- Dónde van los baños
+- Cómo se conecta todo
+
+La **arquitectura** de un software es igual: es el plano que dice **cómo se organiza el código**.
+
+---
+
+## La Arquitectura en Capas
+
+### La Metáfora del Restaurante
+
+Piensa en un restaurante. Tiene diferentes partes que trabajan juntas:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    CAPA DE PRESENTACIÓN                 │
-│                    (Routers / Endpoints)                │
+│                    MESEROS                              │
+│              (Hablan con los clientes)                 │
+│         "Hola, ¿qué desea ordenar?"                    │
 ├─────────────────────────────────────────────────────────┤
-│                    CAPA DE LÓGICA                       │
-│                    (Services)                           │
+│                    COCINA                               │
+│              (Preparan la comida)                       │
+│         "Aquí está tu hamburguesa"                     │
 ├─────────────────────────────────────────────────────────┤
-│                    CAPA DE DATOS                        │
-│                    (Models / ORM)                       │
+│                    DESPENSA                              │
+│              (Organizan los ingredientes)               │
+│         "El tomate está en la nevera"                  │
 ├─────────────────────────────────────────────────────────┤
-│                    BASE DE DATOS                        │
-│                    (MySQL)                              │
+│                    NEVERA                                │
+│              (Guardan todo organizado)                  │
+│         "Aquí guardamos la leche, los huevos..."       │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**¿Por qué usar arquitectura en capas?**
+### En Nuestro Proyecto
 
-La arquitectura en capas es un patrón de diseño que **separa responsabilidades** en niveles distintos. Cada capa solo conoce la capa inmediatamente inferior.
+| Capa | En el Restaurante | En el Software | ¿Qué hace? |
+|------|-------------------|-----------------|------------|
+| **Presentación** | Meseros | Routers | Hablan con el cliente (reciben pedidos) |
+| **Lógica** | Cocina | Services | Preparan la respuesta (reglas de negocio) |
+| **Datos** | Despensa | Models | Organizan los ingredientes (tablas) |
+| **Almacenamiento** | Nevera | Base de datos | Guardan todo (MySQL) |
 
-**Ventajas:**
+### ¿Por qué separar en capas?
 
-1. **Separación de responsabilidades**: Cada capa tiene un trabajo específico y no se mezcla con otros.
-
-2. **Mantenibilidad**: Si necesitas cambiar la base de datos de MySQL a PostgreSQL, solo modificas la capa de datos. El resto del código permanece igual.
-
-3. **Testabilidad**: Puedes probar cada capa de forma aislada. Por ejemplo, probar la lógica de negocio sin necesidad de una base de datos real.
-
-4. **Reutilización**: El mismo servicio puede ser usado por diferentes routers (API REST, GraphQL, CLI).
-
-**Flujo de datos:**
+**Imagina un restaurante sin organización:**
 
 ```
-Petición HTTP → Router (valida) → Service (lógica) → Model (ORM) → Base de datos
-                                   ↓
-                             Router (formatea) → Respuesta HTTP
+❌ El mesero también cocina, limpia y cobra
+❌ El cocinero también atiende mesas
+❌ Nadie sabe qué hace cada quien
+❌ Si algo falla, nadie sabe dónde está el problema
 ```
 
-**Regla de oro**: Los routers nunca acceden directamente a los modelos. Siempre pasan por los servicios.
+**Un restaurante organizado:**
+
+```
+✅ El mesero SOLO atiende al cliente
+✅ El cocinero SOLO cocina
+✅ Cada quien tiene su trabajo
+✅ Si falla algo, sabemos quién es el responsable
+```
+
+---
+
+## Cómo Fluye un Pedido
+
+### Ejemplo: "Quiero ver todos los equipos"
+
+```
+📱 Cliente (Frontend)
+   "GET /api/v1/equipos/"
+   ↓
+
+🚪 ROUTER (La recepcionista)
+   "Hola, ¿qué necesitas? Ah, quieres equipos."
+   Verifica que el pedido esté bien escrito.
+   ↓
+
+👨‍🍳 SERVICE (El chef)
+   "Entendido. Voy a buscar los equipos."
+   Aplica las reglas de negocio.
+   ↓
+
+📦 MODEL (El organizador de la nevera)
+   "SQLAlchemy, traduce esto por favor."
+   SELECT * FROM equipos
+   ↓
+
+🗄️ BASE DE DATOS (La nevera)
+   "Aquí están los 10 equipos que guardé."
+   ↓
+
+📦 MODEL
+   "Perfecto, los convertí a objetos Python."
+   ↓
+
+👨‍🍳 SERVICE
+   "Listo, aquí están los equipos."
+   ↓
+
+🚪 ROUTER
+   "Aquí tienes la respuesta:"
+   [{"id": 1, "nombre": "Real Madrid"}, ...]
+   ↓
+
+📱 Cliente
+   "¡Gracias! Ahora muestro los equipos en pantalla."
+```
+
+### ¿Por qué tantos pasos?
+
+Cada paso tiene **una responsabilidad específica**:
+
+| Paso | Responsabilidad | ¿Por qué separarlo? |
+|------|-----------------|---------------------|
+| Router | Validar el pedido | Si el formato está mal, falla aquí |
+| Service | Reglas de negocio | Si la lógica está mal, falla aquí |
+| Model | Organizar datos | Si la consulta está mal, falla aquí |
+| Base de datos | Guardar datos | Si los datos están corruptos, falla aquí |
+
+**Si algo falla, ¡sabes exactamente dónde buscar!**
+
+---
 
 ## Estructura de Carpetas
+
+### El Árbol de Carpetas
 
 ```
 backend/
 ├── app/
-│   ├── __init__.py
-│   ├── main.py                  # Punto de entrada, configuración FastAPI
-│   ├── config.py                # Variables de entorno (Pydantic Settings)
+│   ├── __init__.py           # Dice "esto es un paquete Python"
+│   ├── main.py               # Donde inicia todo (el jefe)
+│   ├── config.py             # Configuraciones (las reglas)
 │   │
 │   ├── api/
 │   │   ├── __init__.py
-│   │   ├── dependencies.py      # Dependencias inyectables (get_db, auth)
-│   │   ├── routers/             # Endpoints HTTP
-│   │   │   ├── auth.py          # Autenticación
-│   │   │   ├── usuarios.py      # CRUD usuarios
-│   │   │   ├── ligas.py         # CRUD ligas
+│   │   ├── dependencies.py   # Cosas que todos necesitan
+│   │   ├── routers/          # Los meseros (endpoints)
+│   │   │   ├── auth.py       # Mesero de autenticación
+│   │   │   ├── usuarios.py   # Mesero de usuarios
+│   │   │   ├── ligas.py      # Mesero de ligas
 │   │   │   └── ...
 │   │   │
-│   │   └── services/             # Lógica de negocio
+│   │   └── services/         # La cocina (lógica de negocio)
 │   │       ├── usuario_service.py
 │   │       ├── liga_service.py
 │   │       └── ...
 │   │
-│   ├── models/                   # Modelos ORM (tablas)
+│   ├── models/               # La despensa (tablas de BD)
 │   │   ├── usuario.py
 │   │   ├── liga.py
 │   │   └── ...
 │   │
-│   ├── schemas/                 # Validación (Pydantic)
+│   ├── schemas/              # Los formularios (validación)
 │   │   ├── usuario.py
 │   │   ├── liga.py
 │   │   └── ...
 │   │
 │   └── database/
-│       ├── connection.py        # Engine, SessionLocal, Base
-│       └── init.sql             # Script SQL inicial
+│       └── connection.py     # El cable que conecta con MySQL
 │
-├── .env
-├── requirements.txt
-└── README.md
+├── .env                      # Los secretos
+├── requirements.txt          # La lista de compras
+└── README.md                 # Las instrucciones
 ```
 
-**¿Por qué esta estructura de carpetas?**
+### ¿Qué hace cada archivo?
 
-**Organización por tipo de componente:**
+| Archivo/Carpeta | Analogía | ¿Qué hace? |
+|-----------------|----------|------------|
+| `main.py` | El gerente del restaurante | Inicia todo y coordina |
+| `config.py` | El libro de reglas | Lee las configuraciones |
+| `routers/` | Los meseros | Reciben los pedidos del cliente |
+| `services/` | La cocina | Preparan las respuestas |
+| `models/` | La organización de la despensa | Definen cómo se guardan los datos |
+| `schemas/` | Los formularios de pedido | Verifican que los datos estén correctos |
+| `database/` | El cable a la nevera | Conecta con MySQL |
 
-- `routers/`: Agrupa todos los endpoints. Facilita encontrar "¿dónde está el endpoint de usuarios?".
-- `services/`: Toda la lógica de negocio en un lugar.
-- `models/`: Definición de tablas.
-- `schemas/`: Contratos de entrada/salida de la API.
+### ¿Por qué esta estructura?
 
-**Alternativa: Organización por dominio (vertical slice)**
+**Alternativa desordenada (❌):**
 
 ```
 backend/
-└── app/
-    ├── usuarios/
-    │   ├── router.py
-    │   ├── service.py
-    │   ├── model.py
-    │   └── schemas.py
-    └── ligas/
-        └── ...
+├── cosas.py           # ¿Qué hay aquí?
+├── mas_cosas.py       # ¿Y aquí?
+├── usuarios.py        # ¿Router? ¿Service? ¿Model? ¿Quién sabe?
+├── auth.py            # ¿Todo mezclado?
+└── main.py            # ¡Socorro!
 ```
 
-**¿Cuándo usar cada enfoque?**
+**Nuestra estructura organizada (✅):**
 
-| Enfoque | Mejor para | Pros | Contras |
-|---------|-----------|------|---------|
-| Por tipo | Proyectos pequeños/medianos | Fácil de entender para nuevos devs | Archivos relacionados están dispersos |
-| Por dominio | Proyectos grandes/microservicios | Todo lo de "usuarios" junto | Requiere más estructura inicial |
+```
+backend/
+├── api/
+│   ├── routers/       # Aquí están los endpoints
+│   └── services/      # Aquí está la lógica
+├── models/            # Aquí están las tablas
+├── schemas/           # Aquí están las validaciones
+```
 
-**Para este proyecto**: Elegimos organización por tipo porque:
-- Es más fácil de entender para nuevos desarrolladores
-- El proyecto no es muy grande
-- Facilita ver "todos los routers" o "todos los modelos" de un vistazo
+**Ventajas:**
 
-## Responsabilidades por Componente
+1. **Fácil de encontrar:** "¿Dónde está el endpoint de usuarios?" → `routers/usuarios.py`
+2. **Fácil de mantener:** Cambias una cosa y no rompes otra
+3. **Fácil de trabajar en equipo:** Cada persona trabaja en una carpeta
 
-### `main.py` - Punto de Entrada
+---
+
+## Los Componentes Principales
+
+### 1. `main.py` - El Jefe
 
 ```python
 from fastapi import FastAPI
@@ -131,237 +227,113 @@ from .config import settings
 from .database.connection import engine, Base
 from .api.routers import auth, usuarios, ligas
 
-# Eventos del ciclo de vida
+# Lo que pasa al iniciar la app
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Crear las tablas en la base de datos
     Base.metadata.create_all(bind=engine)
-    yield
+    yield  # La app corre aquí
+    # Al apagar, cerrar conexiones
     engine.dispose()
 
+# Crear la aplicación
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.API_VERSION,
     lifespan=lifespan
 )
 
-# Registrar routers
+# Registrar los routers (contratar a los meseros)
 app.include_router(auth.router, prefix="/api/v1", tags=["Autenticación"])
 app.include_router(usuarios.router, prefix="/api/v1", tags=["Usuarios"])
 app.include_router(ligas.router, prefix="/api/v1", tags=["Ligas"])
 ```
 
-**¿Por qué usar `lifespan` en lugar de eventos `on_startup`/`on_shutdown`?**
+**¿Qué hace cada parte?**
 
-**Forma antigua (deprecated):**
+| Línea | ¿Qué hace? |
+|-------|------------|
+| `Base.metadata.create_all()` | Crea las tablas si no existen |
+| `FastAPI(...)` | Crea la aplicación |
+| `include_router()` | Registra los endpoints |
 
-```python
-@app.on_event("startup")
-async def startup():
-    Base.metadata.create_all(bind=engine)
-
-@app.on_event("shutdown")
-async def shutdown():
-    engine.dispose()
-```
-
-**Forma moderna (recomendada):**
-
-```python
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
-    Base.metadata.create_all(bind=engine)
-    yield
-    # Shutdown
-    engine.dispose()
-```
-
-**Ventajas del `lifespan`:**
-
-1. **Código relacionado junto**: Startup y shutdown están en el mismo lugar.
-
-2. **Manejo de recursos async**: Funciona correctamente con conexiones asíncronas.
-
-3. **Contexto gestionado**: Los recursos creados en startup se limpian automáticamente si hay error.
-
-4. **Testing más fácil**: Puedes simular el ciclo de vida completo en tests.
-
-**Responsabilidades:**
-- Crear la instancia de FastAPI
-- Configurar middleware (CORS)
-- Registrar todos los routers
-- Gestionar eventos de inicio/parada
-
-**¿Por qué registrar routers con `include_router`?**
-
-```python
-# ❌ Todo en un archivo - difícil de mantener
-@app.get("/usuarios/")
-def listar_usuarios(): ...
-
-@app.post("/usuarios/")
-def crear_usuario(): ...
-
-@app.get("/ligas/")
-def listar_ligas(): ...
-# ...cientos de endpoints
-
-# ✅ Routers separados - organizado
-app.include_router(usuarios.router, prefix="/api/v1", tags=["Usuarios"])
-app.include_router(ligas.router, prefix="/api/v1", tags=["Ligas"])
-```
-
-**Ventajas:**
-
-1. **Separación**: Cada recurso tiene su archivo.
-2. **Prefijo común**: `/api/v1` para todos los endpoints, fácil de cambiar.
-3. **Tags automáticos**: Documentación Swagger agrupada por tags.
-4. **Reutilización**: Un router puede incluirse en múltiples apps.
-
-### `config.py` - Configuración
+### 2. `config.py` - El Libro de Reglas
 
 ```python
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    DATABASE_URL: str
-    SECRET_KEY: str
-    APP_NAME: str = "Liga Amateur App"
+    # Todo lo que necesita la app
+    DATABASE_URL: str           # ¿Dónde está la base de datos?
+    SECRET_KEY: str             # La llave secreta
+    APP_NAME: str = "Mi App"    # El nombre de la app
 
-    model_config = {"env_file": ".env"}
+    # Leer del archivo .env automáticamente
+    model_config = {
+        "env_file": ".env",
+    }
 
+# Crear una instancia para usar en todo el proyecto
 settings = Settings()
 ```
 
-**¿Por qué una clase `Settings` en lugar de variables globales?**
-
-**Forma problemática:**
+**¿Por qué usar una clase?**
 
 ```python
-# config.py
+# ❌ Sin clase (confuso)
 import os
+DATABASE_URL = os.environ.get("DATABASE_URL")  # Puede ser None
+PORT = int(os.environ.get("PORT", "8000"))     # Tienes que convertir
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///default.db")
-SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-key")
-# Problema: no hay validación, tipos incorrectos silenciosos
+# ✅ Con clase (organizado)
+from app.config import settings
+settings.DATABASE_URL  # Ya es string, garantizado
+settings.PORT           # Ya es int, convertido
 ```
 
-**Forma recomendada:**
+### 3. `models/` - La Despensa
 
 ```python
-class Settings(BaseSettings):
-    DATABASE_URL: str           # Obligatorio, error si falta
-    SECRET_KEY: str             # Obligatorio
-    APP_NAME: str = "Default"   # Opcional con valor por defecto
-```
-
-**Ventajas de la clase Settings:**
-
-1. **Validación al inicio**: Si falta `DATABASE_URL`, la aplicación falla inmediatamente al arrancar, no en medio de una petición.
-
-2. **Tipado**: `PORT` es `int`, no `str`. Conversión automática.
-
-3. **Integración con IDE**: Autocompletado disponible.
-
-4. **Singleton**: `settings = Settings()` una vez, usado en todo el proyecto.
-
-5. **Testing fácil**: Puedes crear instancias con valores diferentes para tests.
-
-**Responsabilidades:**
-- Centralizar configuración
-- Leer variables de entorno
-- Validar tipos de datos
-
-### `models/` - Modelos ORM
-
-Representan tablas de la base de datos como clases Python:
-
-```python
+# app/models/usuario.py
 from sqlalchemy import Column, Integer, String, DateTime
 from ..database.connection import Base
 
 class Usuario(Base):
+    # El nombre de la tabla en MySQL
     __tablename__ = "usuarios"
 
-    # Clave primaria
-    id_usuario = Column(Integer, primary_key=True, index=True)
+    # Las columnas (los campos de la tabla)
+    id_usuario = Column(Integer, primary_key=True)      # El ID único
+    nombre = Column(String(100), nullable=False)        # El nombre (obligatorio)
+    email = Column(String(100), unique=True)            # El email (único)
+    contraseña_hash = Column(String(255))               # La contraseña escondida
 
-    # Campos obligatorios
-    nombre = Column(String(100), nullable=False)
-    email = Column(String(100), nullable=False, unique=True)
-    contraseña_hash = Column(String(255), nullable=False)
-
-    # Campos automáticos
-    created_at = Column(DateTime, server_default=func.now())
-
-    # Relaciones
+    # Relaciones (más adelante veremos esto)
     roles = relationship("Rol", secondary="usuario_rol", back_populates="usuarios")
 ```
 
-**¿Por qué usar ORM en lugar de SQL directo?**
+**¿Qué significa cada cosa?**
 
-**Con SQL directo:**
+| Código | Significado |
+|--------|-------------|
+| `__tablename__` | El nombre de la tabla en MySQL |
+| `primary_key=True` | Es el identificador único |
+| `nullable=False` | Es obligatorio, no puede estar vacío |
+| `unique=True` | No puede repetirse (cada email es único) |
 
-```python
-# Peligroso y propenso a errores
-cursor.execute(f"SELECT * FROM usuarios WHERE id = {user_id}")  # Inyección SQL
-
-# Verboso
-cursor.execute(
-    "INSERT INTO usuarios (nombre, email, contraseña_hash) VALUES (?, ?, ?)",
-    (nombre, email, hash)
-)
-usuario_id = cursor.lastrowid
-```
-
-**Con ORM:**
+### 4. `schemas/` - Los Formularios
 
 ```python
-# Seguro y expresivo
-usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
-
-# Simple
-usuario = Usuario(nombre=nombre, email=email, contraseña_hash=hash)
-db.add(usuario)
-db.commit()
-db.refresh(usuario)  # Obtiene el ID generado
-```
-
-**Ventajas del ORM:**
-
-| Ventaja | Descripción |
-|---------|-------------|
-| **Seguridad** | Prevención automática de inyección SQL |
-| **Productividad** | Menos código, más legible |
-| **Portabilidad** | Cambiar de MySQL a PostgreSQL solo cambiando `DATABASE_URL` |
-| **Relaciones** | Navegación fácil: `usuario.roles` en lugar de JOINs manuales |
-| **Migraciones** | Alembic detecta cambios automáticamente |
-
-**Desventajas:**
-
-| Desventaja | Mitigación |
-|------------|------------|
-| Overhead de abstracción | Usar SQL directo para queries complejas |
-| Curva de aprendizaje | Documentación extensa |
-| Debugging difícil | `echo=True` para ver SQL generado |
-
-**Responsabilidades:**
-- Definir estructura de tablas
-- Mapear tipos SQL a tipos Python
-- Definir relaciones entre tablas
-
-### `schemas/` - Validación de Datos
-
-Definen cómo entran y salen los datos de la API:
-
-```python
+# app/schemas/usuario.py
 from pydantic import BaseModel, EmailStr, Field
 
+# Para crear un usuario (qué datos necesita)
 class UsuarioCreate(BaseModel):
-    nombre: str = Field(..., max_length=100)
+    nombre: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
     password: str = Field(..., min_length=6)
 
+# Para responder (qué datos devolvemos)
 class UsuarioResponse(BaseModel):
     id_usuario: int
     nombre: str
@@ -369,144 +341,105 @@ class UsuarioResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        from_attributes = True
+        from_attributes = True  # Puede leer de SQLAlchemy
 ```
 
-**¿Por qué separar schemas de models?**
-
-**Problema si usamos el modelo directamente:**
-
-```python
-# El modelo Usuario tiene contraseña_hash
-@router.get("/usuarios/{id}")
-def obtener(id: int):
-    usuario = db.query(Usuario).filter(Usuario.id_usuario == id).first()
-    return usuario  # ¡Expone la contraseña!
-```
-
-**Con schemas separados:**
-
-```python
-# UsuarioResponse NO tiene contraseña
-@router.get("/usuarios/{id}", response_model=UsuarioResponse)
-def obtener(id: int):
-    usuario = db.query(Usuario).filter(Usuario.id_usuario == id).first()
-    return usuario  # Solo campos de UsuarioResponse
-```
-
-**Diferentes schemas para diferentes usos:**
+**¿Por qué schemas separados?**
 
 | Schema | Uso | Campos |
 |--------|-----|--------|
-| `UsuarioCreate` | POST /usuarios/ | nombre, email, password |
-| `UsuarioUpdate` | PUT /usuarios/{id} | nombre?, email? (opcionales) |
-| `UsuarioResponse` | GET /usuarios/ | id, nombre, email, created_at |
-| `UsuarioListResponse` | GET /usuarios/ | lista de UsuarioResponse |
+| `UsuarioCreate` | Crear usuario | `nombre`, `email`, `password` |
+| `UsuarioResponse` | Responder | `id`, `nombre`, `email`, `created_at` (¡sin password!) |
 
-**Ventajas de separar:**
+**¡Nunca devuelvas la contraseña!** Por eso usamos schemas diferentes.
 
-1. **Seguridad**: Diferentes campos para entrada y salida.
-2. **Validación**: EmailStr valida formato, min_length para contraseña.
-3. **Documentación**: Swagger usa estos schemas automáticamente.
-4. **Flexibilidad**: Puedes agregar campos calculados en Response (ej: `nombre_completo`).
-
-**Responsabilidades:**
-- Validar datos de entrada
-- Definir formato de respuesta
-- Documentar la API automáticamente
-
-### `services/` - Lógica de Negocio
-
-Contienen toda la lógica de la aplicación:
+### 5. `services/` - La Cocina
 
 ```python
+# app/api/services/usuario_service.py
+from sqlalchemy.orm import Session
+from app.models.usuario import Usuario
+from app.schemas.usuario import UsuarioCreate
+
 def crear_usuario(db: Session, datos: UsuarioCreate):
-    # Verificar email único
+    """
+    Crea un nuevo usuario.
+    Esta es la lógica de negocio.
+    """
+
+    # Regla de negocio: el email debe ser único
     existente = db.query(Usuario).filter(Usuario.email == datos.email).first()
     if existente:
         raise ValueError("El email ya está registrado")
 
+    # Crear el usuario
     usuario = Usuario(
         nombre=datos.nombre,
         email=datos.email,
-        contraseña_hash=hash_password(datos.password)
+        contraseña_hash=hash_password(datos.password)  # ¡Nunca guardar la contraseña original!
     )
+
+    # Guardar en la base de datos
     db.add(usuario)
     db.commit()
-    db.refresh(usuario)
+    db.refresh(usuario)  # Obtener el ID generado
+
     return usuario
 ```
 
-**¿Por qué no poner la lógica en el router?**
-
-**Lógica en router (anti-patrón):**
+**¿Por qué no poner esto en el router?**
 
 ```python
+# ❌ Lógica en el router (confuso)
 @router.post("/usuarios/")
 def crear(datos: UsuarioCreate, db: Session = Depends(get_db)):
-    # Problema: lógica de negocio mezclada con HTTP
     existente = db.query(Usuario).filter(Usuario.email == datos.email).first()
     if existente:
-        raise HTTPException(400, "Email ya registrado")
-
-    usuario = Usuario(
-        nombre=datos.nombre,
-        email=datos.email,
-        contraseña_hash=hash_password(datos.password)
-    )
+        raise HTTPException(400, "Email ya existe")
+    usuario = Usuario(...)
     db.add(usuario)
     db.commit()
     return usuario
-```
 
-**Lógica en servicio (patrón correcto):**
-
-```python
-# Router - solo HTTP
+# ✅ Lógica en el service (organizado)
 @router.post("/usuarios/")
 def crear(datos: UsuarioCreate, db: Session = Depends(get_db)):
     try:
-        return crear_usuario(db, datos)
+        return crear_usuario(db, datos)  # Limpio
     except ValueError as e:
         raise HTTPException(400, str(e))
-
-# Service - solo lógica
-def crear_usuario(db: Session, datos: UsuarioCreate):
-    # Regla de negocio: email único
-    if db.query(Usuario).filter(Usuario.email == datos.email).first():
-        raise ValueError("Email ya registrado")
-    # Crear usuario...
 ```
 
-**Ventajas de separar:**
+**Ventajas:**
 
-1. **Reutilización**: El mismo servicio puede usarse desde REST API, CLI, o tests.
+1. **Limpio:** El router solo maneja HTTP
+2. **Reutilizable:** El mismo service se puede usar desde CLI, tests, etc.
+3. **Fácil de probar:** Puedes probar la lógica sin peticiones HTTP
 
-2. **Testing**: Probar lógica sin necesidad de peticiones HTTP.
-
-3. **Single Responsibility**: Router maneja HTTP, Service maneja negocio.
-
-4. **Mantenimiento**: Cambiar reglas de negocio en un solo lugar.
-
-**Responsabilidades:**
-- Consultar/modificar la base de datos
-- Implementar reglas de negocio
-- Manejar errores específicos
-
-### `routers/` - Endpoints HTTP
-
-Definen los endpoints y delegan a los servicios:
+### 6. `routers/` - Los Meseros
 
 ```python
+# app/api/routers/usuarios.py
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 from app.api.dependencies import get_db
 from app.api.services.usuario_service import crear_usuario
 from app.schemas.usuario import UsuarioCreate, UsuarioResponse
 
+# Crear el router (como contratar un mesero especializado)
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
 @router.post("/", response_model=UsuarioResponse, status_code=201)
 def crear(datos: UsuarioCreate, db: Session = Depends(get_db)):
+    """
+    Crea un nuevo usuario.
+
+    El router SOLO:
+    1. Recibe la petición
+    2. Valida los datos (automático con Pydantic)
+    3. Llama al service
+    4. Devuelve la respuesta
+    """
     try:
         usuario = crear_usuario(db, datos)
         return usuario
@@ -514,235 +447,178 @@ def crear(datos: UsuarioCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 ```
 
-**¿Qué hace exactamente el router?**
+**¿Qué hace el router?**
 
-1. **Recibir petición HTTP**: El decorador `@router.post` define la ruta.
+| Paso | ¿Qué hace? |
+|------|------------|
+| Recibir petición | `@router.post("/")` |
+| Validar datos | `datos: UsuarioCreate` (automático) |
+| Inyectar dependencias | `db: Session = Depends(get_db)` |
+| Llamar service | `crear_usuario(db, datos)` |
+| Manejar errores | `try/except` |
+| Devolver respuesta | `return usuario` |
 
-2. **Validar entrada**: Pydantic valida `datos` automáticamente.
+---
 
-3. **Inyectar dependencias**: `Depends(get_db)` proporciona la sesión de BD.
+## Inyección de Dependencias
 
-4. **Delegar al servicio**: Llama a `crear_usuario()`.
+### ¿Qué es esto?
 
-5. **Manejar errores**: Convierte `ValueError` a `HTTPException`.
-
-6. **Formatear respuesta**: `response_model` filtra y serializa la respuesta.
-
-**¿Por qué usar `response_model`?**
+Imagina que cada vez que un mesero necesita algo, tiene que ir a buscarlo:
 
 ```python
-# Sin response_model
-@router.get("/usuarios/{id}")
-def obtener(id: int, db: Session = Depends(get_db)):
-    return db.query(Usuario).filter(Usuario.id_usuario == id).first()
-# Devuelve TODOS los campos del modelo, incluyendo contraseña_hash
-
-# Con response_model
-@router.get("/usuarios/{id}", response_model=UsuarioResponse)
-def obtener(id: int, db: Session = Depends(get_db)):
-    return db.query(Usuario).filter(Usuario.id_usuario == id).first()
-# Solo devuelve los campos definidos en UsuarioResponse
+# ❌ Sin inyección de dependencias
+@router.post("/usuarios/")
+def crear(datos: UsuarioCreate):
+    # El mesero tiene que conseguir todo solo
+    db = SessionLocal()  # Crear conexión a BD
+    try:
+        usuario = crear_usuario(db, datos)
+        return usuario
+    finally:
+        db.close()  # ¡No olvidar cerrar!
 ```
 
-**Responsabilidades:**
-- Definir rutas HTTP
-- Validar datos con schemas
-- Delegar lógica a servicios
-- Manejar errores HTTP
+**Problema:**
+- Código repetido en cada endpoint
+- Fácil olvidar cerrar la conexión
+- Difícil de probar
 
-### `dependencies.py` - Inyección de Dependencias
+**Con inyección de dependencias (✅):**
 
 ```python
-from app.database.connection import SessionLocal
-
+# La dependencia
 def get_db():
-    db = SessionLocal()
+    db = SessionLocal()  # Crear conexión
     try:
-        yield db
+        yield db          # Dar la conexión
     finally:
-        db.close()
+        db.close()        # Siempre se cierra
 
+# El router
+@router.post("/usuarios/")
+def crear(datos: UsuarioCreate, db: Session = Depends(get_db)):
+    # db ya está listo y se cerrará automáticamente
+    return crear_usuario(db, datos)
+```
+
+**Ventaja:**
+
+El router no se preocupa por crear ni cerrar la conexión. **FastAPI lo hace automáticamente.**
+
+### Dependencias para Autenticación
+
+```python
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    # Validar JWT y obtener usuario
-    ...
+    """
+    Esta dependencia:
+    1. Extrae el token del header
+    2. Verifica que sea válido
+    3. Busca al usuario
+    4. Devuelve al usuario
+    """
+    payload = jwt.decode(token, SECRET_KEY)
+    user_id = payload.get("sub")
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+    if not usuario:
+        raise HTTPException(401, "No autorizado")
     return usuario
+
+# Uso
+@router.get("/me")
+def mi_perfil(current_user = Depends(get_current_user)):
+    # Si llegamos aquí, el usuario ya está autenticado
+    return current_user
 ```
 
-**¿Qué es la Inyección de Dependencias?**
+---
 
-**Sin dependencias (problemático):**
-
-```python
-@router.get("/usuarios/me")
-def mi_perfil():
-    # Problema: ¿de dónde sale db? ¿token?
-    db = SessionLocal()  # Acoplado, difícil de testear
-    token = request.headers.get("Authorization")  # Manual
-    ...
-```
-
-**Con dependencias (correcto):**
-
-```python
-@router.get("/usuarios/me")
-def mi_perfil(db: Session = Depends(get_db), user = Depends(get_current_user)):
-    # db y user se inyectan automáticamente
-    # Fácil de testear: solo pasamos mocks
-    return user
-```
-
-**Ventajas:**
-
-1. **Testeabilidad**: En tests, reemplazamos `get_db` con una base de datos en memoria.
-
-2. **Ciclo de vida**: `get_db` garantiza que la sesión se cierra después de cada petición.
-
-3. **Reutilización**: `get_current_user` se usa en todos los endpoints protegidos.
-
-4. **Legibilidad**: Las dependencias están declaradas explícitamente en la firma.
-
-**El patrón `yield`:**
-
-```python
-def get_db():
-    db = SessionLocal()  # 1. Antes de yield: setup
-    try:
-        yield db         # 2. Durante yield: proporciona el recurso
-    finally:
-        db.close()       # 3. Después de yield: cleanup (SIEMPRE se ejecuta)
-```
-
-Esto garantiza que `db.close()` siempre se ejecuta, incluso si hay una excepción.
-
-**Responsabilidades:**
-- Proporcionar dependencias inyectables
-- Gestionar ciclo de vida de conexiones
-- Implementar autenticación
-
-## Flujo de una Petición
+## El Flujo Completo (Resumen)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  POST /api/v1/usuarios                                          │
-│  Body: {"nombre": "Juan", "email": "juan@email.com", ...}       │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  CLIENTE (Frontend/Móvil)                                           │
+│  "Quiero crear un usuario"                                          │
+│  POST /api/v1/usuarios/                                             │
+│  {"nombre": "Juan", "email": "juan@email.com", "password": "123"}   │
+└─────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  1. ROUTER (usuarios.py)                                        │
-│     - Recibe la petición HTTP                                    │
-│     - Valida datos con UsuarioCreate schema                      │
-│     - Inyecta dependencias (get_db)                              │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  ROUTER (usuarios.py)                                                │
+│  1. Recibe la petición HTTP                                          │
+│  2. Valida los datos con UsuarioCreate schema                        │
+│     - ¿nombre tiene al menos 2 caracteres? ✅                        │
+│     - ¿email es un email válido? ✅                                  │
+│     - ¿password tiene al menos 6 caracteres? ✅                      │
+│  3. Inyecta la base de datos (get_db)                                │
+│  4. Llama al service                                                  │
+└─────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  2. SERVICE (usuario_service.py)                                │
-│     - Ejecuta lógica de negocio                                  │
-│     - Verifica si el email ya existe                             │
-│     - Hashea la contraseña                                       │
-│     - Crea el objeto Usuario                                      │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  SERVICE (usuario_service.py)                                        │
+│  1. Verifica reglas de negocio:                                      │
+│     - ¿El email ya existe? ❌ → ERROR                                │
+│     - ¿El email ya existe? ✅ → Continuar                            │
+│  2. Hashea la contraseña (seguridad)                                 │
+│  3. Crea el objeto Usuario                                           │
+│  4. Llama al model para guardar                                      │
+└─────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  3. MODEL (usuario.py - ORM)                                    │
-│     - Mapea el objeto a fila SQL                                  │
-│     - Ejecuta INSERT INTO usuarios (...)                         │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  MODEL (Usuario)                                                     │
+│  1. Mapea el objeto a SQL                                            │
+│  2. Ejecuta: INSERT INTO usuarios (nombre, email, ...) VALUES (...)  │
+└─────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  4. RESPONSE                                                     │
-│     - Router convierte a UsuarioResponse                         │
-│     - Retorna: {"id_usuario": 1, "nombre": "Juan", ...}          │
-│     - Status: 201 Created                                         │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  BASE DE DATOS (MySQL)                                               │
+│  1. Guarda el usuario                                                │
+│  2. Genera el ID automáticamente                                     │
+│  3. Devuelve el usuario guardado                                     │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  SERVICE (usuario_service.py)                                        │
+│  1. Recibe el usuario con ID                                         │
+│  2. Devuelve al router                                                │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  ROUTER (usuarios.py)                                                │
+│  1. Recibe el usuario                                                │
+│  2. Convierte a UsuarioResponse                                      │
+│     - ¡No incluye la contraseña!                                     │
+│  3. Devuelve status 201 (Created)                                     │
+│  {"id_usuario": 1, "nombre": "Juan", "email": "juan@email.com"}     │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  CLIENTE (Frontend/Móvil)                                            │
+│  Recibe la respuesta                                                  │
+│  Muestra: "¡Usuario creado exitosamente!"                            │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-**¿Por qué este flujo específico?**
+---
 
-**Alternativa: Router → Modelo directamente (anti-patrón)**
+## Resumen
 
-```
-Router → Modelo → BD
-```
+Aprendiste:
 
-Problema: Lógica de negocio (validar email único, hashear contraseña) se mezcla con HTTP.
+1. **Arquitectura en capas** = Organización como un restaurante
+2. **Router** = El mesero (recibe pedidos)
+3. **Service** = La cocina (prepara respuestas)
+4. **Model** = La despensa (organiza datos)
+5. **Schema** = Los formularios (valida datos)
+6. **Database** = La nevera (guarda todo)
 
-**Flujo correcto: Router → Service → Modelo**
+**¿Listo para el siguiente paso?**
 
-1. **Router**: Solo HTTP. Recibe petición, valida formato, devuelve respuesta.
-
-2. **Service**: Solo lógica. Reglas de negocio, validaciones, transformaciones.
-
-3. **Model**: Solo datos. Mapeo a tabla SQL.
-
-**Ejemplo: Crear usuario**
-
-| Capa | Responsabilidad | Código |
-|------|----------------|--------|
-| Router | Recibir POST, validar schema | `@router.post("/usuarios/")` |
-| Service | Verificar email único, hashear contraseña | `crear_usuario(db, datos)` |
-| Model | INSERT en BD | `db.add(usuario)` |
-
-**Beneficio principal**: Si mañana necesitas crear usuarios desde una CLI o un script de migración, usas el mismo servicio sin tocar el router.
-
-## Diagrama de Dependencias
-
-```
-main.py
-    │
-    ├── config.py (settings)
-    │
-    ├── database/connection.py (engine, SessionLocal)
-    │
-    └── api/routers/
-            │
-            ├── dependencies.py (get_db, get_current_user)
-            │
-            ├── schemas/ (validación)
-            │
-            └── services/
-                    │
-                    └── models/ (ORM)
-```
-
-**¿Por qué esta dirección de dependencias?**
-
-**Regla de dependencias (Dependency Rule):**
-
-- Las capas interiores **no conocen** las capas exteriores.
-- Las capas exteriores **conocen** las capas interiores.
-
-```
-main.py → routers → services → models
-  ↓         ↓         ↓         ↓
-config   schemas   (ninguna)   connection
-```
-
-**¿Qué significa esto?**
-
-- `models` **NO** importa de `services` o `routers`.
-- `services` **puede** importar de `models`.
-- `routers` **puede** importar de `services` y `models`.
-- `main.py` **puede** importar de todo.
-
-**¿Por qué importa?**
-
-Si `models` importara de `services`, tendrías una **dependencia circular**:
-
-```python
-# models/usuario.py
-from services.usuario_service import crear_usuario  # ❌ MAL
-
-# services/usuario_service.py
-from models.usuario import Usuario  # ✅ BIEN
-```
-
-**Problema de dependencia circular:**
-1. Python no puede importar correctamente
-2. Código difícil de entender y mantener
-3. Testing se vuelve imposible
-
-**Regla:** Los routers nunca acceden directamente a los modelos. Siempre pasan por los servicios.
+Ve a **03-base-datos.md** para aprender cómo funcionan las tablas y relaciones.
