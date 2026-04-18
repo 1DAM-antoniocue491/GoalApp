@@ -2,14 +2,6 @@
 
 Este documento contiene un resumen de los datos de prueba insertados en la base de datos de GoalApp.
 
-## Conexión a la Base de Datos
-
-| Parámetro | Valor |
-|-----------|-------|
-| Host | sql7.freesqldatabase.com |
-| Usuario | sql7822417 |
-| Base de datos | sql7822417 |
-
 ---
 
 ## Estructura de Tablas
@@ -61,10 +53,10 @@ La base de datos contiene **15 tablas**:
 ### Usuarios de Prueba
 
 #### Administradores
-| Email | Contraseña | Nombre |
-|-------|------------|--------|
-| admin@goalapp.com | admin123 | Carlos Admin |
-| maria.admin@goalapp.com | admin123 | María Admin |
+| Email                   | Contraseña | Nombre       |
+| ----------------------- | ---------- | ------------ |
+| admin@goalapp.com       | admin123   | Carlos Admin |
+| maria.admin@goalapp.com | admin123   | María Admin  |
 
 #### Entrenadores (Coaches)
 | Email | Contraseña | Nombre |
