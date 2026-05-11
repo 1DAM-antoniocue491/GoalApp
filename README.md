@@ -6,6 +6,14 @@ El proyecto se divide en tres componentes principales que trabajan de forma coor
 
 ---
 
+## 📚 Documentación Oficial
+
+Para acceder a la guía técnica completa, manuales de usuario y arquitectura del sistema, visita la documentación oficial en GitBook:
+
+👉 **[Documentación de GoalApp](https://tonyalg.gitbook.io/goalapp-doc/)**
+
+---
+
 ## 🌐 Repositorios del Ecosistema
 
 Para acceder al código fuente de cada módulo, utiliza los siguientes enlaces:
